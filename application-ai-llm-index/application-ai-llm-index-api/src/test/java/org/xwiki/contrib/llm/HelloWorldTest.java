@@ -1,6 +1,4 @@
-<?xml version="1.1" encoding="UTF-8"?>
-
-<!--
+/*
  * See the NOTICE file distributed with this work for additional
  * information regarding copyright ownership.
  *
@@ -18,23 +16,37 @@
  * License along with this software; if not, write to the Free
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
--->
+ */
+package org.xwiki.contrib.llm;
 
-<xwikidoc version="1.5" reference="AI.Code.WebHome" locale="">
-  <web>AI.Code</web>
-  <name>WebHome</name>
-  <language/>
-  <defaultLanguage/>
-  <translation>0</translation>
-  <creator>xwiki:XWiki.Admin</creator>
-  <parent>Main.WebHome</parent>
-  <author>xwiki:XWiki.Admin</author>
-  <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
-  <version>1.1</version>
-  <title>Code</title>
-  <comment/>
-  <minorEdit>false</minorEdit>
-  <syntaxId>xwiki/2.1</syntaxId>
-  <hidden>true</hidden>
-  <content/>
-</xwikidoc>
+import org.junit.jupiter.api.Test;
+import org.xwiki.test.junit5.mockito.ComponentTest;
+import org.xwiki.test.junit5.mockito.InjectMockComponents;
+
+import org.xwiki.contrib.llm.internal.DefaultHelloWorld;
+import org.xwiki.contrib.llm.HelloWorld;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+/**
+ * Unit tests for the {@link HelloWorld} component.
+ *
+ * @version $Id: 8c8b784b7b02d7bb40c99a062275b56e0b6983c2 $
+ */
+@ComponentTest
+class HelloWorldTest
+{
+    @InjectMockComponents
+    private DefaultHelloWorld helloWorld;
+
+     /**
+     * Returns a greeting message by calling the {@link HelloWorld#sayHello()} method.
+     * 
+     * @return the greeting message
+     */
+    @Test
+    void sayHello() throws Exception
+    {
+        assertEquals("Hello", this.helloWorld.sayHello());
+    }
+}
