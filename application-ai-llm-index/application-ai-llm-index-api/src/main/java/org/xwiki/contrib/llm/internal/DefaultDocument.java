@@ -47,18 +47,6 @@ public class DefaultDocument implements Document
     private XWikiDocument document;
     private XWikiContext context;
 
-   /**
-     * Constructor to initialize the component.
-     * 
-     * @param document the XWiki document
-     * @param context the XWiki context
-     */
-    public DefaultDocument(XWikiDocument document, XWikiContext context)
-    {
-        this.document = document;
-        this.context = context;
-    }
-
     /**
      * Handles the initialization of the component.
      * 

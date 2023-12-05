@@ -20,7 +20,6 @@
 package org.xwiki.contrib.llm;
 
 import org.xwiki.component.annotation.Role;
-import com.xpn.xwiki.doc.XWikiDocument;
 
 /**
  * Represents a collection in the AI-LLM indexing system.
@@ -40,14 +39,5 @@ public interface Collection
      * @throws IndexException if the document cannot be retrieved
      */
     Document getDocument(String documentId) throws IndexException;
-
-    /**
-     * Retrieves a document from the collection.
-     *
-     * @return a document
-     * @param document XWiki document
-     * @throws IndexException if the document cannot be retrieved
-     */
-    Document newDocument(XWikiDocument document) throws IndexException;
 
 }

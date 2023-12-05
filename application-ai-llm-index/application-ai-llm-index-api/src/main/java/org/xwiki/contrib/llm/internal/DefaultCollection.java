@@ -91,24 +91,6 @@ public class DefaultCollection implements Collection
         SpaceReference documentSpace =  new SpaceReference("Documents", lastSpaceReference);
         return new DocumentReference(DigestUtils.sha256Hex(documentId), documentSpace);
     }
-    
-    /**
-     * Creates a new DefaultDocument from the provided XWikiDocument.
-     *
-     * @param document the XWikiDocument to create the DefaultDocument from
-     * @return the new DefaultDocument
-     * @throws IndexException if there is an error creating the DefaultDocument
-     */
-    @Override
-    public Document newDocument(XWikiDocument document) throws IndexException
-    {
-        try {
-            // Use the provider to get a new instance and pass the document to the constructor
-            return new DefaultDocument(document, this.contextProvider.get());
-        } catch (Exception e) {
-            throw new IndexException("Failed to create a new DefaultDocument", e);
-        }
-    }
 
     
 }
