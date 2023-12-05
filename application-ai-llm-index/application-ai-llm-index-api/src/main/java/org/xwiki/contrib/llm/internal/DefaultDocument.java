@@ -21,32 +21,29 @@
 package org.xwiki.contrib.llm.internal;
 
 import org.xwiki.component.annotation.Component;
-
+import org.xwiki.component.annotation.InstantiationStrategy;
+import org.xwiki.component.descriptor.ComponentInstantiationStrategy;
 import org.xwiki.contrib.llm.Document;
 
 import com.xpn.xwiki.doc.XWikiDocument;
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
+import com.xpn.xwiki.doc.XWikiAttachment;
 
 import org.apache.tika.Tika;
 import org.apache.tika.exception.TikaException;
-import com.xpn.xwiki.doc.XWikiAttachment;
 
 import java.io.IOException;
 import java.util.List;
-
-import javax.inject.Singleton;
-
 /**
- * Implementation of a {@code IDocument} component.
+ * Implementation of a {@code Document} component.
  *
  * @version $Id$
  */
-@Component
-@Singleton
+@Component(roles = DefaultDocument.class)
+@InstantiationStrategy(ComponentInstantiationStrategy.PER_LOOKUP)
 public class DefaultDocument implements Document
 {
-
     private XWikiDocument document;
     private XWikiContext context;
 

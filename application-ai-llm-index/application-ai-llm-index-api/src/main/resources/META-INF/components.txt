@@ -2,4 +2,3 @@ org.xwiki.contrib.llm.internal.DefaultHelloWorld
 org.xwiki.contrib.llm.internal.DefaultCollection
 org.xwiki.contrib.llm.internal.DefaultDocument
 org.xwiki.contrib.llm.script.HelloWorldScriptService
-org.xwiki.contrib.llm.script.CollectionScriptService

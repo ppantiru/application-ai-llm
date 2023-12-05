@@ -24,7 +24,6 @@ import org.xwiki.test.junit5.mockito.ComponentTest;
 import org.xwiki.test.junit5.mockito.InjectMockComponents;
 
 import org.xwiki.contrib.llm.internal.DefaultHelloWorld;
-import org.xwiki.contrib.llm.HelloWorld;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -50,3 +49,5 @@ class HelloWorldTest
         assertEquals("Hello", this.helloWorld.sayHello());
     }
 }
+
+// for real xwiki documents use old core test 

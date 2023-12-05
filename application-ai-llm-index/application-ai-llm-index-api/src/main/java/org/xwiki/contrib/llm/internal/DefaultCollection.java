@@ -23,11 +23,11 @@ package org.xwiki.contrib.llm.internal;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
-import javax.inject.Singleton;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.xwiki.component.annotation.Component;
-
+import org.xwiki.component.annotation.InstantiationStrategy;
+import org.xwiki.component.descriptor.ComponentInstantiationStrategy;
 import org.xwiki.contrib.llm.Collection;
 import org.xwiki.contrib.llm.Document;
 import org.xwiki.contrib.llm.IndexException;
@@ -44,11 +44,10 @@ import com.xpn.xwiki.doc.XWikiDocument;
  *
  * @version $Id$
  */
-@Component
-@Singleton
+@Component(roles = DefaultCollection.class)
+@InstantiationStrategy(ComponentInstantiationStrategy.PER_LOOKUP)
 public class DefaultCollection implements Collection
 {
-
     @Inject 
     private Provider<XWikiContext> contextProvider;
 
@@ -86,6 +85,12 @@ public class DefaultCollection implements Collection
         }
     }
 
+    private DocumentReference getDocumentReference(String documentId)
+    {
+        SpaceReference lastSpaceReference = this.document.getDocumentReference().getLastSpaceReference();
+        SpaceReference documentSpace =  new SpaceReference("Documents", lastSpaceReference);
+        return new DocumentReference(DigestUtils.sha256Hex(documentId), documentSpace);
+    }
     
     /**
      * Creates a new DefaultDocument from the provided XWikiDocument.
@@ -105,11 +110,5 @@ public class DefaultCollection implements Collection
         }
     }
 
-    private DocumentReference getDocumentReference(String documentId)
-    {
-        SpaceReference lastSpaceReference = this.document.getDocumentReference().getLastSpaceReference();
-        SpaceReference documentSpace =  new SpaceReference("Documents", lastSpaceReference);
-        return new DocumentReference(DigestUtils.sha256Hex(documentId), documentSpace);
-    }
     
 }
