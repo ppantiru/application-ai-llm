@@ -19,6 +19,12 @@
  */
 package org.xwiki.contrib.llm;
 
+import java.io.IOException;
+
+import org.apache.tika.exception.TikaException;
+
+import com.xpn.xwiki.XWikiException;
+
 /**
  * Represents a document within the WAISE collection in the AI-LLM indexing system.
  *
@@ -31,14 +37,7 @@ public interface Document
      *
      * @return the document's ID
      */
-    String getId();
-
-    /**
-     * Retrieves the collection the document belongs to.
-     *
-     * @return the collection the document belongs to
-     */
-    String getCollection();
+    String getID();
 
     /**
      * Retrieves the title of the document.
@@ -59,7 +58,7 @@ public interface Document
      *
      * @return the document's URL
      */
-    String getUrl();
+    String getURL();
 
     /**
      * Retrieves the MIME type of an attachment.
@@ -72,19 +71,9 @@ public interface Document
      * Retrieves the content of the document.
      *
      * @return the document's content
+     * @throws XWikiException
+     * @throws TikaException
+     * @throws IOException
      */
-    String getContent();
-
-    /**
-     *  Generate embeddings for self.
-     * 
-     * @return embeddings
-     */
-    String generateEmbeddings();
-
-    /**
-    * Store embeddings in Solr.
-    * @param embeddings to be stored in the dense vector format
-    */
-    void storeEmbeddings(String embeddings);
+    String getContent() throws IOException, TikaException, XWikiException;
 }

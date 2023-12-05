@@ -20,22 +20,20 @@
 
 package org.xwiki.contrib.llm.internal;
 
-import java.util.List;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
+import javax.inject.Singleton;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.xwiki.component.annotation.Component;
-import org.xwiki.component.annotation.InstantiationStrategy;
-import org.xwiki.component.descriptor.ComponentInstantiationStrategy;
+
 import org.xwiki.contrib.llm.Collection;
 import org.xwiki.contrib.llm.Document;
 import org.xwiki.contrib.llm.IndexException;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.model.reference.SpaceReference;
-import org.xwiki.security.authorization.AccessDeniedException;
-import org.xwiki.user.UserReference;
+
 
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
@@ -46,8 +44,8 @@ import com.xpn.xwiki.doc.XWikiDocument;
  *
  * @version $Id$
  */
-@Component(roles = DefaultCollection.class)
-@InstantiationStrategy(ComponentInstantiationStrategy.PER_LOOKUP)
+@Component
+@Singleton
 public class DefaultCollection implements Collection
 {
 
@@ -78,13 +76,32 @@ public class DefaultCollection implements Collection
             XWikiDocument resultDocument = context.getWiki().getDocument(documentReference, context);
             if (!resultDocument.isNew()) {
                 DefaultDocument result = this.documentProvider.get();
-                result.initialize(resultDocument);
+                result.initialize(resultDocument, context);
                 return result;
             } else {
                 return null;
             }
         } catch (XWikiException e) {
             throw new IndexException("Failed to get document " + documentId, e);
+        }
+    }
+
+    
+    /**
+     * Creates a new DefaultDocument from the provided XWikiDocument.
+     *
+     * @param document the XWikiDocument to create the DefaultDocument from
+     * @return the new DefaultDocument
+     * @throws IndexException if there is an error creating the DefaultDocument
+     */
+    @Override
+    public Document newDocument(XWikiDocument document) throws IndexException
+    {
+        try {
+            // Use the provider to get a new instance and pass the document to the constructor
+            return new DefaultDocument(document, this.contextProvider.get());
+        } catch (Exception e) {
+            throw new IndexException("Failed to create a new DefaultDocument", e);
         }
     }
 
@@ -95,90 +112,4 @@ public class DefaultCollection implements Collection
         return new DocumentReference(DigestUtils.sha256Hex(documentId), documentSpace);
     }
     
-    @Override
-    public String getName()
-    {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getName'");
-    }
-
-    @Override
-    public List<String> getDocumentList(int offset, int count)
-    {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getDocumentList'");
-    }
-
-
-    @Override
-    public List<UserReference> getUseUsers()
-    {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getUseUsers'");
-    }
-
-    @Override
-    public List<DocumentReference> getUseGroups()
-    {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getUseGroups'");
-    }
-
-    @Override
-    public List<UserReference> getManagerUsers()
-    {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getManagerUsers'");
-    }
-
-    @Override
-    public List<DocumentReference> getManagerGroups()
-    {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getManagerGroups'");
-    }
-
-    @Override
-    public List<UserReference> getAdminUsers()
-    {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getAdminUsers'");
-    }
-
-    @Override
-    public List<DocumentReference> getAdminGroups()
-    {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getAdminGroups'");
-    }
-
-    @Override
-    public String getChunkingMethod()
-    {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getChunkingMethod'");
-    }
-
-    @Override
-    public String getEmbeddingModel()
-    {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getEmbeddingModel'");
-    }
-
-    @Override
-    public Document createDocument(String documentId) throws IndexException, AccessDeniedException
-    {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'createDocument'");
-    }
-
-    @Override
-    public void removeDocument(String documentId) throws IndexException, AccessDeniedException
-    {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'removeDocument'");
-    }
-
-
 }

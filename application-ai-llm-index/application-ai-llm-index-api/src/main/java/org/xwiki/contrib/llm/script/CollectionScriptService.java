@@ -19,41 +19,61 @@
  */
 package org.xwiki.contrib.llm.script;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+
 import org.xwiki.component.annotation.Component;
-import org.xwiki.component.annotation.InstantiationStrategy;
-import org.xwiki.component.descriptor.ComponentInstantiationStrategy;
 import org.xwiki.script.service.ScriptService;
+
+import javax.inject.Singleton;
 
 import org.xwiki.contrib.llm.Collection;
 import org.xwiki.contrib.llm.Document;
 import org.xwiki.contrib.llm.IndexException;
-import org.xwiki.contrib.llm.internal.DefaultCollection;
-
-import javax.inject.Inject;
-import javax.inject.Named;
-
-
+import com.xpn.xwiki.doc.XWikiDocument;
 /**
  * Make the HelloWorld API available to scripting.
  *
- * @version $Id: 9d6e720e780c0f661812f7813756354dc8dde770 $
+ * @version $Id$
  */
-@Component(roles = DefaultCollection.class)
-@Named("collection")
-@InstantiationStrategy(ComponentInstantiationStrategy.PER_LOOKUP)
+@Component
+@Named("collectionService")
+@Singleton
 public class CollectionScriptService implements ScriptService
 {
-    @Inject 
+
+    @Inject
     private Collection collection;
 
     /**
-     * Returns a document form the collection {@link Collection#getDocument(String documentId)}.
-     * 
-     * @param documentId the document identifier
-     * @return the document
+     * Retrieves a document by its ID from the collection.
+     *
+     * @param documentId the identifier of the document
+     * @return the retrieved document
      */
-    public Document getDocument(String documentId) throws IndexException
+    public Document getDocument(String documentId)
     {
-        return this.collection.getDocument(documentId);
+        try {
+            return collection.getDocument(documentId);
+        } catch (IndexException e) {
+            // Handle the exception appropriately, for instance, log it or return null
+            return null;
+        }
+    }
+
+    /**
+     * Creates a new document in the collection.
+     *
+     * @param document the XWiki document to add to the collection
+     * @return the newly created document
+     */
+    public Document newDocument(XWikiDocument document)
+    {
+        try {
+            return collection.newDocument(document);
+        } catch (IndexException e) {
+            // Handle the exception appropriately
+            return null;
+        }
     }
 }
