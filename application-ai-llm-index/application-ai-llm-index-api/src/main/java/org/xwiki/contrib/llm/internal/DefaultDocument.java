@@ -25,16 +25,9 @@ import org.xwiki.component.annotation.InstantiationStrategy;
 import org.xwiki.component.descriptor.ComponentInstantiationStrategy;
 import org.xwiki.contrib.llm.Document;
 
-import com.xpn.xwiki.doc.XWikiDocument;
-import com.xpn.xwiki.XWikiContext;
-import com.xpn.xwiki.XWikiException;
-import com.xpn.xwiki.doc.XWikiAttachment;
-
-import org.apache.tika.Tika;
-import org.apache.tika.exception.TikaException;
-
-import java.io.IOException;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 /**
  * Implementation of a {@code Document} component.
  *
@@ -42,80 +35,162 @@ import java.util.List;
  */
 @Component(roles = DefaultDocument.class)
 @InstantiationStrategy(ComponentInstantiationStrategy.PER_LOOKUP)
+/**
+ * DefaultDocument implements the Document interface to provide access to an XWikiDocument and related data. It allows
+ * retrieving metadata like the document id, title, language, URL, MIME type, and content. The class handles
+ * initializing itself with an XWikiDocument and XWikiContext. It provides implementations of Document methods to expose
+ * document properties and content.
+ */
 public class DefaultDocument implements Document
 {
-    private XWikiDocument document;
-    private XWikiContext context;
+    private static final String ID_KEY = "id";
+    private static final String TITLE_KEY = "title";
+    private static final String LANG_KEY = "language";
+    private static final String URL_KEY = "url";
+    private static final String MIMETYPE_KEY = "mimetype";
+    private static final String CONTENT_KEY = "content";
+    private static final String EMBEDDINGS_KEY = "embeddings";
 
-    /**
-     * Handles the initialization of the component.
-     * 
-     * @param document
-     * @param context
-     */
-    public void initialize(XWikiDocument document, XWikiContext context)
-    {
-        this.document = document;
-        this.context = context;
-    }
+    private String id;
+    private String title;
+    private String language;
+    private String url;
+    private String mimetype;
+    private String content;
+    private String embeddings;
 
     @Override
-    public String getID()
+    public Map<String, String> getProperties()
     {
-        return String.valueOf(this.document.getDocumentReference());
+        Map<String, String> properties = new HashMap<>();
+        properties.put(ID_KEY, id);
+        properties.put(TITLE_KEY, title);
+        properties.put(LANG_KEY, language);
+        properties.put(URL_KEY, url);
+        properties.put(MIMETYPE_KEY, mimetype);
+        properties.put(CONTENT_KEY, content);
+        properties.put(EMBEDDINGS_KEY, embeddings);
+        return properties;
+    }
+
+    /**
+     * Gets the property value based on the key.
+     *
+     * @param key the property key
+     * @return an Optional containing the property value if present
+     */
+    public Optional<String> getProperty(String key)
+    {
+        Optional<String> property;
+        switch (key) {
+            case ID_KEY:
+                property = Optional.ofNullable(id);
+                break;
+            case TITLE_KEY:
+                property = Optional.ofNullable(title);
+                break;
+            case LANG_KEY:
+                property = Optional.ofNullable(language);
+                break;
+            case URL_KEY:
+                property = Optional.ofNullable(url);
+                break;
+            case MIMETYPE_KEY:
+                property = Optional.ofNullable(mimetype);
+                break;
+            case CONTENT_KEY:
+                property = Optional.ofNullable(content);
+                break;
+            case EMBEDDINGS_KEY:
+                property = Optional.ofNullable(embeddings);
+                break;
+            default:
+                property = Optional.empty();
+                break;
+        }
+        return property;
+    }
+    @Override
+    public String getId()
+    {
+        return id;
     }
 
     @Override
     public String getTitle()
     {
-        return this.document.getTitle();
+        return title;
     }
 
     @Override
     public String getLanguage()
     {
-        return this.document.getLocale().getLanguage();
+        return language;
     }
 
     @Override
     public String getURL()
     {
-        return this.document.getURL("view", context);
+        return url;
     }
 
     @Override
-    public String getMimeType()
+    public String getMimetype()
     {
-        List<XWikiAttachment> attachmentList = this.document.getAttachmentList();
-    
-        // Return the MIME type of the first attachment if available, else a default message.
-        return attachmentList.isEmpty() 
-               ? "No attachment found!" 
-               : attachmentList.get(0).getMimeType();
+        return mimetype;
     }
-    
 
     @Override
-    public String getContent() throws IOException, TikaException, XWikiException
+    public String getContent()
     {
-        // Check if the document has direct content
-        String content = this.document.getContent();
-        if (content != null) {
-            return content;
-        }
-    
-        // Process the first attachment if available
-        List<XWikiAttachment> attachmentList = this.document.getAttachmentList();
-        if (!attachmentList.isEmpty()) {
-            XWikiAttachment attachment = attachmentList.get(0);
-            Tika tika = new Tika();
-            return tika.parseToString(attachment.getContentInputStream(context));
-        }
-    
-        // Return a default message if there's no content or attachments
-        return "No content found!";
+        return content;
     }
-    
 
+    @Override
+    public String getEmbeddings()
+    {
+        return embeddings;
+    }
+
+    @Override
+    public void setId(String id)
+    {
+        this.id = id;
+    }
+
+    @Override
+    public void setTitle(String title)
+    {
+        this.title = title;
+    }
+
+    @Override
+    public void setLanguage(String language)
+    {
+        this.language = language;
+    }
+
+    @Override
+    public void setURL(String url)
+    {
+        this.url = url;
+    }
+
+    @Override
+    public void setMimetype(String mimetype)
+    {
+        this.mimetype = mimetype;
+    }
+
+    @Override
+    public void setContent(String content)
+    {
+        this.content = content;
+    }
+
+    @Override
+    public void setEmbeddings(String embeddings)
+    {
+        this.embeddings = embeddings;
+    }
 }
-

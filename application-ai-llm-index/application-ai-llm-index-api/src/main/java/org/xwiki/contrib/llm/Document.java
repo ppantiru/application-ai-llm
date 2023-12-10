@@ -19,11 +19,7 @@
  */
 package org.xwiki.contrib.llm;
 
-import java.io.IOException;
-
-import org.apache.tika.exception.TikaException;
-
-import com.xpn.xwiki.XWikiException;
+import java.util.Optional;
 
 /**
  * Represents a document within the WAISE collection in the AI-LLM indexing system.
@@ -37,7 +33,7 @@ public interface Document
      *
      * @return the document's ID
      */
-    String getID();
+    String getId();
 
     /**
      * Retrieves the title of the document.
@@ -54,26 +50,95 @@ public interface Document
     String getLanguage();
 
     /**
-     * Retrieves the URL where the document is located.
-     *
+     * Retrieves the URL of the document.
+     * 
      * @return the document's URL
      */
     String getURL();
 
     /**
-     * Retrieves the MIME type of an attachment.
+     * Retrieves the mimetype of the document.
      *
-     * @return the document's MIME type
+     * @return the document's mimetype
      */
-    String getMimeType();
+    String getMimetype();
 
     /**
      * Retrieves the content of the document.
      *
      * @return the document's content
-     * @throws XWikiException
-     * @throws TikaException
-     * @throws IOException
      */
-    String getContent() throws IOException, TikaException, XWikiException;
+    String getContent();
+
+    /**
+     * Retrieves the embeddings of the document.
+     * 
+     * @return the document's embeddings
+     */
+    String getEmbeddings();
+
+    /**
+     * Retrieves the properties of the document.
+     *
+     * @return the document's properties
+     */
+    java.util.Map<String, String> getProperties();
+
+    /**
+     * Retrieves a specific property of the document.
+     * 
+     * @param key The property key
+     * @return The property value if present
+     */
+    Optional<String> getProperty(String key);
+
+    /**
+     * Sets the id of the document.
+     *
+     * @param id The new id
+     */
+    void setId(String id);
+
+    /**
+     * Sets the title of the document.
+     *
+     * @param title The new title
+     */
+    void setTitle(String title);
+
+    /**
+     * Sets the language of the document.
+     *
+     * @param lang The new language
+     */
+    void setLanguage(String lang);
+
+    /**
+     * Sets the URL of the document.
+     *
+     * @param url The new URL
+     */
+    void setURL(String url);
+
+    /**
+     * Sets the mimetype of the document.
+     *
+     * @param mimetype The new mimetype
+     */
+    void setMimetype(String mimetype);
+
+    /**
+     * Sets the content of the document.
+     * 
+     * @param content The new content
+     */
+    void setContent(String content);
+
+    /**
+     * Sets the embeddings of the document.
+     *
+     * @param embeddings The new embeddings
+     */
+    void setEmbeddings(String embeddings);
+
 }

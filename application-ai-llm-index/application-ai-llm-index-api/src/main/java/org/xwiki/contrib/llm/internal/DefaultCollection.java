@@ -17,80 +17,118 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-
 package org.xwiki.contrib.llm.internal;
 
-
-import javax.inject.Inject;
-import javax.inject.Provider;
-
-import org.apache.commons.codec.digest.DigestUtils;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.InstantiationStrategy;
 import org.xwiki.component.descriptor.ComponentInstantiationStrategy;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.xwiki.contrib.llm.Collection;
 import org.xwiki.contrib.llm.Document;
-import org.xwiki.contrib.llm.IndexException;
-import org.xwiki.model.reference.DocumentReference;
-import org.xwiki.model.reference.SpaceReference;
-
-
-import com.xpn.xwiki.XWikiContext;
-import com.xpn.xwiki.XWikiException;
-import com.xpn.xwiki.doc.XWikiDocument;
 
 /**
- * Implementation of a {@code ICollection} component.
+ * Implementation of a {@code Collection} component.
  *
  * @version $Id$
  */
-@Component(roles = DefaultCollection.class)
+@Component(roles = DefaultDocument.class)
 @InstantiationStrategy(ComponentInstantiationStrategy.PER_LOOKUP)
 public class DefaultCollection implements Collection
 {
-    @Inject 
-    private Provider<XWikiContext> contextProvider;
-
-    @Inject
-    private Provider<DefaultDocument> documentProvider;
-
-    private XWikiDocument document;
+    private String name;
+    private Map<String, Document> documents;
+    private String permissions;
+    private String embeddingModel;
 
     /**
-     * Handles the initialization of the component.
-     * 
-     * @param document
+     * Default constructor for DefaultCollection.
+     * Initializes the collection name, permissions, embedding model, 
+     * and empty document map.
+     *
+     * @param name The name of the collection.
+     * @param permissions The permissions string for the collection. 
+     * @param embeddingModel The embedding model used by the collection.
      */
-    public void initialize(XWikiDocument document)
+    public DefaultCollection(String name, String permissions, String embeddingModel)
     {
-        this.document = document;
+        this.name = name;
+        this.permissions = permissions;
+        this.embeddingModel = embeddingModel;
+        this.documents = new HashMap<>();
     }
 
     @Override
-    public Document getDocument(String documentId) throws IndexException
+    public String getName()
     {
-        XWikiContext context = this.contextProvider.get();
-        DocumentReference documentReference = getDocumentReference(documentId);
-        try {
-            XWikiDocument resultDocument = context.getWiki().getDocument(documentReference, context);
-            if (!resultDocument.isNew()) {
-                DefaultDocument result = this.documentProvider.get();
-                result.initialize(resultDocument, context);
-                return result;
-            } else {
-                return null;
+        return name;
+    }
+
+    @Override
+    public List<Document> getDocumentList()
+    {
+        return new ArrayList<>(documents.values());
+    }
+
+    @Override
+    public Document getDocument(String id)
+    {
+        return documents.get(id);
+    }
+
+    @Override
+    public String getPermissions()
+    {
+        return permissions;
+    }
+
+    @Override
+    public String getEmbeddingModel()
+    {
+        return embeddingModel;
+    }
+
+    @Override
+    public boolean removeDocument(String id, boolean deleteDocument)
+    {
+        if (documents.containsKey(id)) {
+            if (deleteDocument) {
+                // Implement document deletion logic here if needed
             }
-        } catch (XWikiException e) {
-            throw new IndexException("Failed to get document " + documentId, e);
+            documents.remove(id);
+            return true;
         }
+        return false;
     }
 
-    private DocumentReference getDocumentReference(String documentId)
+    @Override
+    public void assignIdToDocument(Document document, String id)
     {
-        SpaceReference lastSpaceReference = this.document.getDocumentReference().getLastSpaceReference();
-        SpaceReference documentSpace =  new SpaceReference("Documents", lastSpaceReference);
-        return new DocumentReference(DigestUtils.sha256Hex(documentId), documentSpace);
+        // check if the document already exists
+        documents.put(id, document);
     }
 
-    
+    @Override
+    public Document createDocument()
+    {
+        // Create a new document with a unique ID and empty properties
+        // Implement logic to generate a unique ID and create a new document
+        String uniqueId = generateUniqueId();
+        Document newDocument = new DefaultDocument();
+        newDocument.setId(uniqueId);
+        documents.put(uniqueId, newDocument);
+        return newDocument;
+    }
+
+    private String generateUniqueId()
+    {
+        // Implement a method to generate a unique ID
+        // This is a placeholder implementation
+        return "doc" + (documents.size() + 1);
+    }
 }
+
