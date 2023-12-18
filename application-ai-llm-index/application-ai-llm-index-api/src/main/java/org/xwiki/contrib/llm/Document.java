@@ -21,9 +21,6 @@ package org.xwiki.contrib.llm;
 
 import java.util.Optional;
 
-import org.xwiki.model.EntityType;
-import org.xwiki.model.reference.EntityReference;
-
 import com.xpn.xwiki.XWikiException;
 
 /**
@@ -33,14 +30,6 @@ import com.xpn.xwiki.XWikiException;
  */
 public interface Document 
 {
-
-    /**
-     * The reference to the KIDocument class, relative to the current wiki.
-     */
-    EntityReference STORAGE_XWIKI_DOCUMENT_CLASS = new EntityReference(
-        "KiDocumentsClass", EntityType.DOCUMENT, new EntityReference("AILLMApp.KiDocuments.Code",
-            EntityType.SPACE));
-
     /**
      * Retrieves the unique identifier of the document.
      *

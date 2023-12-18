@@ -28,20 +28,20 @@ import com.xpn.xwiki.doc.XWikiDocument;
  */
 public interface Converter
 {
-            
     /**
-     * Converts an XWiki document to an index collection.
-     *  
-     * @param collection The XWiki document to convert.
-     * @return The XWikiDocument representation of the collection.
+     * Sets the properteis of a collection based on the properties of the specified XWiki document's object.
+     * 
+     * @param xwikiDocument
+     * @return The updated collection.
      */
-    XWikiDocument toXWikiDocument(Collection collection);
-     
+    Collection toCollection(XWikiDocument xwikiDocument);
+
     /**
-     * Converts an XWikiDocument to a collection.
-     *  
-     * @param document The XWiki document to convert.
-     * @return The collection representation of the XWiki document.
+     * Sets the properties of a XWiki document's object based on the properties of the collection.
+     * 
+     * @param xwikiDocument The XWiki document to update.
+     * @return The updated XWiki document.
      */
-    Collection toCollection(XWikiDocument document);
+    XWikiDocument toXWikiDocument(XWikiDocument xwikiDocument);
+
 }

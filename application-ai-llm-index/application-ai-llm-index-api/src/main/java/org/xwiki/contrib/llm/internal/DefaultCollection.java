@@ -19,11 +19,10 @@
  */
 package org.xwiki.contrib.llm.internal;
 
-import org.apache.commons.codec.digest.DigestUtils;
+import org.slf4j.Logger;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.InstantiationStrategy;
 import org.xwiki.component.descriptor.ComponentInstantiationStrategy;
-import org.xwiki.context.Execution;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -35,45 +34,39 @@ import javax.inject.Provider;
 
 import org.xwiki.contrib.llm.Collection;
 import org.xwiki.contrib.llm.Document;
-import org.xwiki.model.reference.DocumentReference;
-import org.xwiki.model.reference.SpaceReference;
-import org.xwiki.contrib.llm.Converter;
+import org.xwiki.model.EntityType;
+import org.xwiki.model.reference.EntityReference;
 
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
 import com.xpn.xwiki.doc.XWikiDocument;
-
-import org.slf4j.Logger;
+import com.xpn.xwiki.objects.BaseObject;
 
 /**
  * Implementation of a {@code Collection} component.
  *
  * @version $Id$
  */
-@Component(roles = DefaultDocument.class)
+@Component(roles = DefaultCollection.class)
 @InstantiationStrategy(ComponentInstantiationStrategy.PER_LOOKUP)
-public class DefaultCollection implements Collection, Converter
+public class DefaultCollection implements Collection
 {
-    /**
-     * The execution, to get the context from it.
-     */
-    @Inject
-    protected Execution execution;
+    private static final String NAME_KEY = "name";
+    private static final String PERMISSIONS_KEY = "permissions";
+    private static final String EMBEDDINGMODEL_KEY = "embeddingModel";
+    private static final String XCLASS = "AILLMApp.Collections.Code.CollectionsClass";
     
+    @Inject 
+    private Provider<XWikiContext> contextProvider;
+    
+    @Inject
+    private Logger logger;
+
     private String name;
     private Map<String, Document> documents;
     private String permissions;
     private String embeddingModel;
     private XWikiDocument document;
-    
-    /**
-     * The logger to log.
-     */
-    @Inject
-    private Logger logger;
-
-    @Inject
-    private Provider<DefaultDocument> documentProvider;    
 
     /**
      * Default constructor for DefaultCollection.
@@ -84,7 +77,7 @@ public class DefaultCollection implements Collection, Converter
      * @param permissions The permissions string for the collection. 
      * @param embeddingModel The embedding model used by the collection.
      */
-    public DefaultCollection(String name, String permissions, String embeddingModel)
+    public void initialize(String name, String permissions, String embeddingModel)
     {
         this.name = name;
         this.permissions = permissions;
@@ -123,6 +116,36 @@ public class DefaultCollection implements Collection, Converter
     }
 
     @Override
+    public boolean setName(String name)
+    {
+        if (name != null) {
+            this.name = name;
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean setPermissions(String permissions)
+    {
+        if (permissions != null) {
+            this.permissions = permissions;
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean setEmbeddingModel(String embeddingModel)
+    {
+        if (embeddingModel != null) {
+            this.embeddingModel = embeddingModel;
+            return true;
+        }
+        return false;
+    }
+
+    @Override
     public boolean removeDocument(String id, boolean deleteDocument)
     {
         if (documents.containsKey(id)) {
@@ -152,12 +175,12 @@ public class DefaultCollection implements Collection, Converter
         return newDocument;
     }
 
-    private DocumentReference getDocumentReference(String documentId)
-    {
-        SpaceReference lastSpaceReference = this.document.getDocumentReference().getLastSpaceReference();
-        SpaceReference documentSpace =  new SpaceReference("Documents", lastSpaceReference);
-        return new DocumentReference(DigestUtils.sha256Hex(documentId), documentSpace);
-    }
+    // private DocumentReference getDocumentReference(String documentId)
+    // {
+    //     SpaceReference lastSpaceReference = this.document.getDocumentReference().getLastSpaceReference();
+    //     SpaceReference documentSpace =  new SpaceReference("Documents", lastSpaceReference);
+    //     return new DocumentReference(DigestUtils.sha256Hex(documentId), documentSpace);
+    // }
 
     private String generateUniqueId()
     {
@@ -165,26 +188,55 @@ public class DefaultCollection implements Collection, Converter
         // This is a placeholder implementation
         return "doc" + (documents.size() + 1);
     }
-
-    /**
-     * @return the xwiki context from the execution context
-     */
-    private XWikiContext getXContext()
-    {
-        return (XWikiContext) execution.getContext().getProperty("xwikicontext");
-    }
-
-    @Override
-    public XWikiDocument toXWikiDocument(Collection collection)
-    {
-        return this.document;
-    }
-
+    
     @Override
     public Collection toCollection(XWikiDocument document)
     {
         this.document = document;
+        EntityReference documentReference = this.document.getDocumentReference();
+        EntityReference objectEntityReference = new EntityReference(
+            XCLASS,
+            EntityType.OBJECT,
+            documentReference
+        );
+        BaseObject object = this.document.getXObject(objectEntityReference);
+    
+        // Pull collection properties from the xobject using constants
+        this.name = object.getStringValue(NAME_KEY);
+        this.permissions = object.getStringValue(PERMISSIONS_KEY);
+        this.embeddingModel = object.getStringValue(EMBEDDINGMODEL_KEY);
+    
         return this;
+    }
+    
+
+    @Override
+    public XWikiDocument toXWikiDocument(XWikiDocument document)
+    {
+        this.document = document;
+        EntityReference documentReference = this.document.getDocumentReference();
+        EntityReference objectEntityReference = new EntityReference(
+            XCLASS,
+            EntityType.OBJECT,
+            documentReference
+            );
+        BaseObject object = this.document.getXObject(objectEntityReference);
+
+        //update the xobject with the collection properties
+        object.setStringValue(NAME_KEY, this.name);
+        object.setStringValue(PERMISSIONS_KEY, this.permissions);
+        object.setStringValue(EMBEDDINGMODEL_KEY, this.embeddingModel);
+
+        //save xdocument
+        XWikiContext context = this.contextProvider.get();
+        try {
+            context.getWiki().saveDocument(this.document, context);
+        } catch (XWikiException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        return this.document;
     }
 }
 

@@ -22,12 +22,15 @@ package org.xwiki.contrib.llm;
 import java.util.List;
 
 import com.xpn.xwiki.XWikiException;
+import com.xpn.xwiki.doc.XWikiDocument;
 
+import org.xwiki.component.annotation.Role;
 /**
  * Represents a collection of documents within the AI-LLM indexing system.
  *
  * @version $Id$
  */
+@Role
 public interface Collection
 {
     /**
@@ -91,5 +94,43 @@ public interface Collection
      */
     Document createDocument() throws XWikiException;
 
-    
+    /**
+     * Sets the name of the collection.
+     * 
+     * @param name The name of the collection.
+     * @return True if the operation was successful, false otherwise.
+     */
+    boolean setName(String name);
+
+    /**
+     * Sets the permissions of the collection.
+     * 
+     * @param permissions The permissions of the collection.
+     * @return True if the operation was successful, false otherwise.
+     */
+    boolean setPermissions(String permissions);
+
+    /**
+     * Sets the embedding model of the collection.
+     * 
+     * @param embeddingModel The embedding model of the collection.
+     * @return True if the operation was successful, false otherwise.
+     */
+    boolean setEmbeddingModel(String embeddingModel);
+
+        /**
+     * Sets the properteis of a collection based on the properties of the specified XWiki document's object.
+     * 
+     * @param xwikiDocument
+     * @return The updated collection.
+     */
+    Collection toCollection(XWikiDocument xwikiDocument);
+
+    /**
+     * Sets the properties of a XWiki document's object based on the properties of the collection.
+     * 
+     * @param xwikiDocument The XWiki document to update.
+     * @return The updated XWiki document.
+     */
+    XWikiDocument toXWikiDocument(XWikiDocument xwikiDocument);
 }

@@ -29,6 +29,7 @@ import org.xwiki.contrib.llm.CollectionManager;
 import org.xwiki.component.annotation.Component;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 
 import javax.inject.Singleton;
 
@@ -47,6 +48,9 @@ public class DefaultCollectionManager implements CollectionManager
     @Inject
     private Logger logger;
     
+    @Inject
+    private Provider<DefaultCollection> collectionProvider;
+
     private Map<String, DefaultCollection> collections = new HashMap<>();
 
     
@@ -58,7 +62,8 @@ public class DefaultCollectionManager implements CollectionManager
             this.logger.warn("Collection with name {} already exists", name);
             return null;
         } else {
-            DefaultCollection newCollection = new DefaultCollection(name, permissions, embeddingModel);
+            DefaultCollection newCollection = collectionProvider.get();
+            newCollection.initialize(name, permissions, embeddingModel);
             this.collections.put(name, newCollection);
             return newCollection;
         }
