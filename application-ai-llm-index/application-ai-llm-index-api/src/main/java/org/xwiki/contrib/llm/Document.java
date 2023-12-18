@@ -46,7 +46,7 @@ public interface Document
      *
      * @return the document's ID
      */
-    String getId();
+    String getID();
 
     /**
      * Retrieves the title of the document.
@@ -95,7 +95,7 @@ public interface Document
      *
      * @param id The new id
      */
-    void setId(String id);
+    void setID(String id);
 
     /**
      * Sets the title of the document.

@@ -37,6 +37,7 @@ import org.xwiki.contrib.llm.Collection;
 import org.xwiki.contrib.llm.Document;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.model.reference.SpaceReference;
+import org.xwiki.contrib.llm.Converter;
 
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
@@ -51,7 +52,7 @@ import org.slf4j.Logger;
  */
 @Component(roles = DefaultDocument.class)
 @InstantiationStrategy(ComponentInstantiationStrategy.PER_LOOKUP)
-public class DefaultCollection implements Collection
+public class DefaultCollection implements Collection, Converter
 {
     /**
      * The execution, to get the context from it.
@@ -144,28 +145,11 @@ public class DefaultCollection implements Collection
     @Override
     public Document createDocument() throws XWikiException
     {
-        logger.error("LOGGER: Got here");
         String uniqueId = generateUniqueId();
         Document newDocument = new DefaultDocument();
-        newDocument.setId(uniqueId);
+        newDocument.setID(uniqueId);
         documents.put(uniqueId, newDocument);
-         
-
-
-        XWikiContext context = getXContext();
-        DocumentReference documentReference = getDocumentReference(uniqueId);
-        XWikiDocument resultDocument = context.getWiki().getDocument(documentReference, context);
-
-        logger.error("LOGGER: There was an error in creating the document {} for document {}",
-                documentReference, resultDocument);
-
-        if (!resultDocument.isNew()) {
-            DefaultDocument result = this.documentProvider.get();
-            result.initialize(resultDocument);
-            return result;
-        } else {
-            return null;
-        }
+        return newDocument;
     }
 
     private DocumentReference getDocumentReference(String documentId)
@@ -188,6 +172,19 @@ public class DefaultCollection implements Collection
     private XWikiContext getXContext()
     {
         return (XWikiContext) execution.getContext().getProperty("xwikicontext");
+    }
+
+    @Override
+    public XWikiDocument toXWikiDocument(Collection collection)
+    {
+        return this.document;
+    }
+
+    @Override
+    public Collection toCollection(XWikiDocument document)
+    {
+        this.document = document;
+        return this;
     }
 }
 

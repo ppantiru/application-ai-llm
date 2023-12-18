@@ -49,7 +49,7 @@ public final class SolrConnector
     {
         try (SolrClient client = new HttpSolrClient.Builder(SOLR_CORE_URL).build()) {
             SolrInputDocument solrDocument = new SolrInputDocument();
-            solrDocument.addField("id", document.getId());
+            solrDocument.addField("id", document.getID());
             solrDocument.addField("title", document.getTitle());
             solrDocument.addField("language", document.getLanguage());
             solrDocument.addField("url", document.getURL());

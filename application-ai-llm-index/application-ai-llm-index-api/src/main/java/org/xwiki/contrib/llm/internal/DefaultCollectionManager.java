@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.xwiki.contrib.llm.CollectionManager;
+
 import org.xwiki.component.annotation.Component;
 
 import javax.inject.Inject;
@@ -85,6 +86,4 @@ public class DefaultCollectionManager implements CollectionManager
         }
         return false;
     }
-        
-        
 }

@@ -16,7 +16,7 @@
 				},
 				"getters": ["getName", "getChunkingMethod", "getPermissions", "getSpace", "getEmbeddingModel"],
 				"setters": ["setName", "setChunkingMethod", "setPermissions", "setSpace", "setEmbeddingModel"],
-				"doc_management_methods": ["listDocuments", "getDocument", "addDocument", "updateDocument", "removeDocument","documentToXWikiDocument/save","XWikiDocumentToDocument/update"],
+				"doc_management_methods": ["listDocuments", "getDocument", "addDocument", "updateDocument", "removeDocument","documentToXWikiDocument/push","XWikiDocumentToDocument/pull"],
 				"indexing_methods": ["indexDocuments", "indexDocument"],
 				"storage": "XWikiDocument + XWikiObject",
 				"DOCUMENTS": [
@@ -33,6 +33,7 @@
 						},
 						"getters": ["getId", "getTitle", "getLanguage", "getURL", "getCollection", "getMimeType", "getContent", "getProperties", "getProperty", "getChunks?", "getEmbeddings?"],
 						"setters": ["setId", "setTitle", "setLanguage", "setURL", "setCollection", "setMimeType", "setContent", "setEmbeddings?"],
+						"functional": ["chunk", "computeEmbeddings", "storeEmbeddings","push","pull"],
 						"storage": "XWikiDocument + XWikiObject",
 						"DOCUMENT_CHUNKS": [
 							{

@@ -29,7 +29,6 @@ import org.xwiki.contrib.llm.Document;
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
 import com.xpn.xwiki.doc.XWikiDocument;
-import com.xpn.xwiki.objects.BaseObject;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -77,24 +76,6 @@ public class DefaultDocument implements Document
     private String embeddings;
     
     private XWikiDocument xdocument;
-    private BaseObject xobject;
-    
-    
-    /**
-     * Handles the initialization of the component.
-     * 
-     * @param xdocument
-     */
-    public void initialize(XWikiDocument xdocument)
-    {
-        XWikiContext context = getXContext();
-        this.xdocument = xdocument;
-        try {
-            this.xobject = xdocument.newXObject(Document.STORAGE_XWIKI_DOCUMENT_CLASS, context);
-        } catch (XWikiException e) {
-            e.printStackTrace();
-        }
-    }
     
     
     @Override
@@ -153,7 +134,7 @@ public class DefaultDocument implements Document
         return property;
     }
     @Override
-    public String getId()
+    public String getID()
     {
         return id;
     }
@@ -167,7 +148,7 @@ public class DefaultDocument implements Document
     @Override
     public String getLanguage()
     {
-        return xobject.getStringValue(LANG_KEY);
+        return language;
     }
 
     @Override
@@ -191,7 +172,7 @@ public class DefaultDocument implements Document
     @Override
     public String getContent()
     {
-        return this.xdocument.getContent();
+        return content;
     }
 
     @Override
@@ -201,7 +182,7 @@ public class DefaultDocument implements Document
     }
 
     @Override
-    public void setId(String id)
+    public void setID(String id)
     {
         this.id = id;
     }
@@ -215,7 +196,7 @@ public class DefaultDocument implements Document
     @Override
     public void setLanguage(String language)
     {
-        this.xobject.setStringValue(LANG_KEY, language);
+        this.language = language;
     }
 
     @Override
@@ -239,7 +220,7 @@ public class DefaultDocument implements Document
     @Override
     public void setContent(String content)
     {
-        this.xdocument.setContent(content);
+        this.content = content;
     }
 
     @Override

@@ -90,4 +90,6 @@ public interface Collection
      * @throws XWikiException
      */
     Document createDocument() throws XWikiException;
+
+    
 }
