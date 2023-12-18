@@ -21,6 +21,11 @@ package org.xwiki.contrib.llm;
 
 import java.util.Optional;
 
+import org.xwiki.model.EntityType;
+import org.xwiki.model.reference.EntityReference;
+
+import com.xpn.xwiki.XWikiException;
+
 /**
  * Represents a document within the WAISE collection in the AI-LLM indexing system.
  *
@@ -28,6 +33,14 @@ import java.util.Optional;
  */
 public interface Document 
 {
+
+    /**
+     * The reference to the KIDocument class, relative to the current wiki.
+     */
+    EntityReference STORAGE_XWIKI_DOCUMENT_CLASS = new EntityReference(
+        "KiDocumentsClass", EntityType.DOCUMENT, new EntityReference("AILLMApp.KiDocuments.Code",
+            EntityType.SPACE));
+
     /**
      * Retrieves the unique identifier of the document.
      *
@@ -57,6 +70,13 @@ public interface Document
     String getURL();
 
     /**
+     * Retrieves the collection of the document.
+     *
+     * @return the document's collection
+     */
+    String getCollection();
+
+    /**
      * Retrieves the mimetype of the document.
      *
      * @return the document's mimetype
@@ -69,28 +89,6 @@ public interface Document
      * @return the document's content
      */
     String getContent();
-
-    /**
-     * Retrieves the embeddings of the document.
-     * 
-     * @return the document's embeddings
-     */
-    String getEmbeddings();
-
-    /**
-     * Retrieves the properties of the document.
-     *
-     * @return the document's properties
-     */
-    java.util.Map<String, String> getProperties();
-
-    /**
-     * Retrieves a specific property of the document.
-     * 
-     * @param key The property key
-     * @return The property value if present
-     */
-    Optional<String> getProperty(String key);
 
     /**
      * Sets the id of the document.
@@ -121,6 +119,13 @@ public interface Document
     void setURL(String url);
 
     /**
+     * Sets the collection of the document.
+     *
+     * @param collection The new collection
+     */
+    void setCollection(String collection);
+
+    /**
      * Sets the mimetype of the document.
      *
      * @param mimetype The new mimetype
@@ -141,4 +146,32 @@ public interface Document
      */
     void setEmbeddings(String embeddings);
 
+    /**
+     * Retrieves the embeddings of the document.
+     * 
+     * @return the document's embeddings
+     */
+    String getEmbeddings();
+    
+    /**
+     * Retrieves the properties of the document.
+     *
+     * @return the document's properties
+     */
+    java.util.Map<String, String> getProperties();
+
+    /**
+     * Retrieves a specific property of the document.
+     * 
+     * @param key The property key
+     * @return The property value if present
+     */
+    Optional<String> getProperty(String key);
+
+    /**
+     * Saves the document values to XWikiDocument.
+     * @throws XWikiException
+     *
+     */
+    void save() throws XWikiException;
 }

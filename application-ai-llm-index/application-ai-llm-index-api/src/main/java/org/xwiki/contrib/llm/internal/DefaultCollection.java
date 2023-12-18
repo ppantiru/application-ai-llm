@@ -19,17 +19,30 @@
  */
 package org.xwiki.contrib.llm.internal;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.InstantiationStrategy;
 import org.xwiki.component.descriptor.ComponentInstantiationStrategy;
+import org.xwiki.context.Execution;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
+import javax.inject.Provider;
+
 import org.xwiki.contrib.llm.Collection;
 import org.xwiki.contrib.llm.Document;
+import org.xwiki.model.reference.DocumentReference;
+import org.xwiki.model.reference.SpaceReference;
+
+import com.xpn.xwiki.XWikiContext;
+import com.xpn.xwiki.XWikiException;
+import com.xpn.xwiki.doc.XWikiDocument;
+
+import org.slf4j.Logger;
 
 /**
  * Implementation of a {@code Collection} component.
@@ -40,10 +53,26 @@ import org.xwiki.contrib.llm.Document;
 @InstantiationStrategy(ComponentInstantiationStrategy.PER_LOOKUP)
 public class DefaultCollection implements Collection
 {
+    /**
+     * The execution, to get the context from it.
+     */
+    @Inject
+    protected Execution execution;
+    
     private String name;
     private Map<String, Document> documents;
     private String permissions;
     private String embeddingModel;
+    private XWikiDocument document;
+    
+    /**
+     * The logger to log.
+     */
+    @Inject
+    private Logger logger;
+
+    @Inject
+    private Provider<DefaultDocument> documentProvider;    
 
     /**
      * Default constructor for DefaultCollection.
@@ -113,15 +142,37 @@ public class DefaultCollection implements Collection
     }
 
     @Override
-    public Document createDocument()
+    public Document createDocument() throws XWikiException
     {
-        // Create a new document with a unique ID and empty properties
-        // Implement logic to generate a unique ID and create a new document
+        logger.error("LOGGER: Got here");
         String uniqueId = generateUniqueId();
         Document newDocument = new DefaultDocument();
         newDocument.setId(uniqueId);
         documents.put(uniqueId, newDocument);
-        return newDocument;
+         
+
+
+        XWikiContext context = getXContext();
+        DocumentReference documentReference = getDocumentReference(uniqueId);
+        XWikiDocument resultDocument = context.getWiki().getDocument(documentReference, context);
+
+        logger.error("LOGGER: There was an error in creating the document {} for document {}",
+                documentReference, resultDocument);
+
+        if (!resultDocument.isNew()) {
+            DefaultDocument result = this.documentProvider.get();
+            result.initialize(resultDocument);
+            return result;
+        } else {
+            return null;
+        }
+    }
+
+    private DocumentReference getDocumentReference(String documentId)
+    {
+        SpaceReference lastSpaceReference = this.document.getDocumentReference().getLastSpaceReference();
+        SpaceReference documentSpace =  new SpaceReference("Documents", lastSpaceReference);
+        return new DocumentReference(DigestUtils.sha256Hex(documentId), documentSpace);
     }
 
     private String generateUniqueId()
@@ -129,6 +180,14 @@ public class DefaultCollection implements Collection
         // Implement a method to generate a unique ID
         // This is a placeholder implementation
         return "doc" + (documents.size() + 1);
+    }
+
+    /**
+     * @return the xwiki context from the execution context
+     */
+    private XWikiContext getXContext()
+    {
+        return (XWikiContext) execution.getContext().getProperty("xwikicontext");
     }
 }
 

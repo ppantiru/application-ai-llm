@@ -23,11 +23,19 @@ package org.xwiki.contrib.llm.internal;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.InstantiationStrategy;
 import org.xwiki.component.descriptor.ComponentInstantiationStrategy;
+import org.xwiki.context.Execution;
 import org.xwiki.contrib.llm.Document;
+
+import com.xpn.xwiki.XWikiContext;
+import com.xpn.xwiki.XWikiException;
+import com.xpn.xwiki.doc.XWikiDocument;
+import com.xpn.xwiki.objects.BaseObject;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+
+import javax.inject.Inject;
 /**
  * Implementation of a {@code Document} component.
  *
@@ -43,22 +51,52 @@ import java.util.Optional;
  */
 public class DefaultDocument implements Document
 {
+    
     private static final String ID_KEY = "id";
     private static final String TITLE_KEY = "title";
     private static final String LANG_KEY = "language";
     private static final String URL_KEY = "url";
+    private static final String PARENT_COLLECTION = "collection";
     private static final String MIMETYPE_KEY = "mimetype";
     private static final String CONTENT_KEY = "content";
     private static final String EMBEDDINGS_KEY = "embeddings";
-
+    
+    /**
+     * The execution, to get the context from it.
+     */
+    @Inject
+    protected Execution execution;
+    
     private String id;
     private String title;
     private String language;
     private String url;
+    private String collection;
     private String mimetype;
     private String content;
     private String embeddings;
-
+    
+    private XWikiDocument xdocument;
+    private BaseObject xobject;
+    
+    
+    /**
+     * Handles the initialization of the component.
+     * 
+     * @param xdocument
+     */
+    public void initialize(XWikiDocument xdocument)
+    {
+        XWikiContext context = getXContext();
+        this.xdocument = xdocument;
+        try {
+            this.xobject = xdocument.newXObject(Document.STORAGE_XWIKI_DOCUMENT_CLASS, context);
+        } catch (XWikiException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    
     @Override
     public Map<String, String> getProperties()
     {
@@ -67,6 +105,7 @@ public class DefaultDocument implements Document
         properties.put(TITLE_KEY, title);
         properties.put(LANG_KEY, language);
         properties.put(URL_KEY, url);
+        properties.put(PARENT_COLLECTION, collection);
         properties.put(MIMETYPE_KEY, mimetype);
         properties.put(CONTENT_KEY, content);
         properties.put(EMBEDDINGS_KEY, embeddings);
@@ -94,6 +133,9 @@ public class DefaultDocument implements Document
                 break;
             case URL_KEY:
                 property = Optional.ofNullable(url);
+                break;
+            case PARENT_COLLECTION:
+                property = Optional.ofNullable(collection);
                 break;
             case MIMETYPE_KEY:
                 property = Optional.ofNullable(mimetype);
@@ -125,13 +167,19 @@ public class DefaultDocument implements Document
     @Override
     public String getLanguage()
     {
-        return language;
+        return xobject.getStringValue(LANG_KEY);
     }
 
     @Override
     public String getURL()
     {
         return url;
+    }
+
+    @Override
+    public String getCollection()
+    {
+        return collection;
     }
 
     @Override
@@ -143,7 +191,7 @@ public class DefaultDocument implements Document
     @Override
     public String getContent()
     {
-        return content;
+        return this.xdocument.getContent();
     }
 
     @Override
@@ -167,13 +215,19 @@ public class DefaultDocument implements Document
     @Override
     public void setLanguage(String language)
     {
-        this.language = language;
+        this.xobject.setStringValue(LANG_KEY, language);
     }
 
     @Override
     public void setURL(String url)
     {
         this.url = url;
+    }
+    
+    @Override
+    public void setCollection(String collection)
+    {
+        this.collection = collection;
     }
 
     @Override
@@ -185,12 +239,27 @@ public class DefaultDocument implements Document
     @Override
     public void setContent(String content)
     {
-        this.content = content;
+        this.xdocument.setContent(content);
     }
 
     @Override
     public void setEmbeddings(String embeddings)
     {
         this.embeddings = embeddings;
+    }
+
+    @Override
+    public void save() throws XWikiException
+    {
+        XWikiContext context = getXContext();
+        context.getWiki().saveDocument(this.xdocument, "Saving document", context);
+    }
+    
+    /**
+     * @return the xwiki context from the execution context
+     */
+    protected XWikiContext getXContext()
+    {
+        return (XWikiContext) execution.getContext().getProperty("xwikicontext");
     }
 }

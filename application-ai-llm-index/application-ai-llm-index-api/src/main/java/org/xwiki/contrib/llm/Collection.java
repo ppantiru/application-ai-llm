@@ -21,6 +21,8 @@ package org.xwiki.contrib.llm;
 
 import java.util.List;
 
+import com.xpn.xwiki.XWikiException;
+
 /**
  * Represents a collection of documents within the AI-LLM indexing system.
  *
@@ -85,6 +87,7 @@ public interface Collection
      * Creates a new document in the collection with a unique ID. The properties of the document can be set afterwards.
      * 
      * @return The newly created document.
+     * @throws XWikiException
      */
-    Document createDocument();
+    Document createDocument() throws XWikiException;
 }

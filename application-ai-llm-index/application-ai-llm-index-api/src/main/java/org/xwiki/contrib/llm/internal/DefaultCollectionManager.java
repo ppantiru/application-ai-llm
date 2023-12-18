@@ -25,9 +25,13 @@ import java.util.List;
 import java.util.Map;
 
 import org.xwiki.contrib.llm.CollectionManager;
-
 import org.xwiki.component.annotation.Component;
+
+import javax.inject.Inject;
+
 import javax.inject.Singleton;
+
+import org.slf4j.Logger;
 
 /**
  * Implementation of a {@code CollectionManager} component.
@@ -36,27 +40,40 @@ import javax.inject.Singleton;
  */
 @Component
 @Singleton
-public final class DefaultCollectionManager implements CollectionManager
+public class DefaultCollectionManager implements CollectionManager
 {
+    
+    @Inject
+    private Logger logger;
+    
     private Map<String, DefaultCollection> collections = new HashMap<>();
 
+    
+    @Override
+    public DefaultCollection createCollection(String name, String permissions, String embeddingModel)
+    {
+        if (this.collections.containsKey(name)) {
+            // Handle existing collection case
+            this.logger.warn("Collection with name {} already exists", name);
+            return null;
+        } else {
+            DefaultCollection newCollection = new DefaultCollection(name, permissions, embeddingModel);
+            this.collections.put(name, newCollection);
+            return newCollection;
+        }
+
+    }
+        
     @Override
     public List<DefaultCollection> listCollections()
     {
         return new ArrayList<>(collections.values());
     }
-
+    
     @Override
-    public DefaultCollection createCollection(String name, String permissions, String embeddingModel)
+    public DefaultCollection getCollection(String name)
     {
-        if (collections.containsKey(name)) {
-            // Handle existing collection case
-            return null;
-        }
-
-        DefaultCollection newCollection = new DefaultCollection(name, permissions, embeddingModel);
-        collections.put(name, newCollection);
-        return newCollection;
+        return collections.get(name);
     }
 
     @Override
@@ -68,11 +85,6 @@ public final class DefaultCollectionManager implements CollectionManager
         }
         return false;
     }
-
-    @Override
-    public DefaultCollection getCollection(String name)
-    {
-        return collections.get(name);
-    }
-
+        
+        
 }

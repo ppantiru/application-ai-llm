@@ -76,4 +76,14 @@ public class CollectionManagerScriptService implements ScriptService
     {
         return collectionManager.getCollection(name);
     }
+
+    /**
+     * Deletes a collection.
+     * @param name
+     * @return boolean indicating success or failure
+     */
+    public boolean deleteCollection(String name)
+    {
+        return collectionManager.deleteCollection(name);
+    }
 }

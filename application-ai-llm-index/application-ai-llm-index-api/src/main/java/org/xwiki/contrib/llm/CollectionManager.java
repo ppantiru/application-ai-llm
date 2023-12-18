@@ -32,14 +32,6 @@ import org.xwiki.contrib.llm.internal.DefaultCollection;
 @Role
 public interface CollectionManager
 {
-
-    /**
-     * Lists all collections.
-     *
-     * @return a list of all collections
-     */
-    List<DefaultCollection> listCollections();
-
     /**
      * Creates a new collection.
      *
@@ -49,14 +41,14 @@ public interface CollectionManager
      * @return the created collection
      */
     DefaultCollection createCollection(String name, String permissions, String embeddingModel);
-
+    
     /**
-     * Deletes a collection.
-     * @param name
-     * @return boolean indicating success or failure
+     * Lists all collections.
+     *
+     * @return a list of all collections
      */
-    boolean deleteCollection(String name);
-
+    List<DefaultCollection> listCollections();
+    
     /**
      * Gets a collection by name.
      *
@@ -64,4 +56,11 @@ public interface CollectionManager
      * @return the collection with the given name
      */
     DefaultCollection getCollection(String name);
+    
+    /**
+     * Deletes a collection.
+     * @param name
+     * @return boolean indicating success or failure
+     */
+    boolean deleteCollection(String name);
 }
