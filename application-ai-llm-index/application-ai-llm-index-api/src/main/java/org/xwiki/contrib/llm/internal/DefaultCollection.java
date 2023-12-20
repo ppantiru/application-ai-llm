@@ -30,12 +30,15 @@ import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.inject.Provider;
 
 import org.xwiki.contrib.llm.Collection;
 import org.xwiki.contrib.llm.Document;
 import org.xwiki.model.EntityType;
 import org.xwiki.model.reference.EntityReference;
+import org.xwiki.model.reference.SpaceReference;
+import org.xwiki.model.reference.SpaceReferenceResolver;
 
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
@@ -51,22 +54,75 @@ import com.xpn.xwiki.objects.BaseObject;
 @InstantiationStrategy(ComponentInstantiationStrategy.PER_LOOKUP)
 public class DefaultCollection implements Collection
 {
-    private static final String NAME_KEY = "name";
-    private static final String PERMISSIONS_KEY = "permissions";
-    private static final String EMBEDDINGMODEL_KEY = "embeddingModel";
-    private static final String XCLASS = "AILLMApp.Collections.Code.CollectionsClass";
-    
+    /**
+     * name of the collection.
+     */
+    public static final String NAME_FIELDNAME = "name";
+    /**
+     * Ebedding model used by the collection.
+     */
+    public static final String EMBEDDINGMODEL_FIELDNAME = "embeddingModel";
+    /**
+     * The name of the field that stores the chunking method.
+     */
+    public static final String CHUNKING_METHOD_FIELDNAME = "chunkingMethod";
+    /**
+     * The name of the field that stores the chunking max size.
+     */
+    public static final String CHUNKING_MAX_SIZE_FIELDNAME = "chunkingMaxSize";
+    /**
+     * The name of the field that stores the chunking overlap offset.
+     */
+    public static final String CHUNKING_OVERLAP_OFFSET_FIELDNAME = "chunkingOverlapOffset";
+    /**
+     * Permissions for the collection.
+     */
+    public static final String PERMISSIONS_FIELDNAME = "permissions";
+    /**
+     * The name of the field that stores the rights check method.
+     */
+    public static final String RIGHTS_CHECK_METHOD_FIELDNAME = "rightsCheckMethod";
+    /**
+     * The name of the field that stores the rights check method parameter.
+     */
+    public static final String RIGHTS_CHECK_METHOD_PARAMETER_FIELDNAME = "rightsCheckMethodParam";
+    /**
+     * The name of the field that stores the location of the documents in XWiki.
+     */
+    public static final String DOCUMENT_SPACE_FIELDNAME = "documentSpace";
+    /**
+     * The name of the XClass that stors the collection information.
+     */
+    public static final String XCLASS_NAME = "CollectionsClass";
+    /**
+     * The space where the XClass that stores the collection information is located.
+     */
+    public static final String XCLASS_SPACE_STRING = "AILLMApp.Collections.Code";
+
+    private String name;
+    private String embeddingModel;
+    private String chunkingMethod;
+    private String chunkingMaxSize;
+    private String chunkingOverlapOffset;
+    private String permissions;
+    private String rightsCheckMethod;
+    private String rightsCheckMethodParameter;
+    private String documentSpace;
+    private Map<String, Document> documents;
+    private XWikiDocument xwikidocument;
+
+    @Inject
+    private Provider<DefaultDocument> documentProvider;
+
     @Inject 
     private Provider<XWikiContext> contextProvider;
     
     @Inject
     private Logger logger;
-
-    private String name;
-    private Map<String, Document> documents;
-    private String permissions;
-    private String embeddingModel;
-    private XWikiDocument document;
+    
+    @Inject
+    @Named("current")
+    private SpaceReferenceResolver<String> explicitStringSpaceRefResolver;
 
     /**
      * Default constructor for DefaultCollection.
@@ -82,6 +138,13 @@ public class DefaultCollection implements Collection
         this.name = name;
         this.permissions = permissions;
         this.embeddingModel = embeddingModel;
+        this.chunkingMethod = "maxTokens";
+        this.chunkingMaxSize = "1000";
+        this.chunkingOverlapOffset = "0";
+        this.rightsCheckMethod = "jwt";
+        this.rightsCheckMethodParameter = "";
+        String dSpace = "AILLMApp.Collections." + this.name + ".Documents";
+        this.documentSpace = dSpace;
         this.documents = new HashMap<>();
     }
 
@@ -169,74 +232,107 @@ public class DefaultCollection implements Collection
     public Document createDocument() throws XWikiException
     {
         String uniqueId = generateUniqueId();
-        Document newDocument = new DefaultDocument();
-        newDocument.setID(uniqueId);
+        DefaultDocument newDocument = documentProvider.get();
+        newDocument.initialize(uniqueId);
         documents.put(uniqueId, newDocument);
         return newDocument;
     }
 
-    // private DocumentReference getDocumentReference(String documentId)
-    // {
-    //     SpaceReference lastSpaceReference = this.document.getDocumentReference().getLastSpaceReference();
-    //     SpaceReference documentSpace =  new SpaceReference("Documents", lastSpaceReference);
-    //     return new DocumentReference(DigestUtils.sha256Hex(documentId), documentSpace);
-    // }
-
     private String generateUniqueId()
     {
-        // Implement a method to generate a unique ID
-        // This is a placeholder implementation
-        return "doc" + (documents.size() + 1);
+        return "document" + (documents.size() + 1);
     }
     
     @Override
     public Collection toCollection(XWikiDocument document)
     {
-        this.document = document;
-        EntityReference documentReference = this.document.getDocumentReference();
+        this.xwikidocument = document;
+        EntityReference documentReference = this.xwikidocument.getDocumentReference();
         EntityReference objectEntityReference = new EntityReference(
-            XCLASS,
+            XCLASS_SPACE_STRING + "." + XCLASS_NAME,
             EntityType.OBJECT,
             documentReference
         );
-        BaseObject object = this.document.getXObject(objectEntityReference);
-    
-        // Pull collection properties from the xobject using constants
-        this.name = object.getStringValue(NAME_KEY);
-        this.permissions = object.getStringValue(PERMISSIONS_KEY);
-        this.embeddingModel = object.getStringValue(EMBEDDINGMODEL_KEY);
-    
+        BaseObject object = this.xwikidocument.getXObject(objectEntityReference);
+        pullXObjectValues(object);
+        
         return this;
     }
     
+    // Pull collection properties from the XObject
+    private void pullXObjectValues(BaseObject object)
+    {
+        this.name = object.getStringValue(NAME_FIELDNAME);
+        this.embeddingModel = object.getStringValue(EMBEDDINGMODEL_FIELDNAME);
+        this.chunkingMethod = object.getStringValue(CHUNKING_METHOD_FIELDNAME);
+        this.chunkingMaxSize = object.getStringValue(CHUNKING_MAX_SIZE_FIELDNAME);
+        this.chunkingOverlapOffset = object.getStringValue(CHUNKING_OVERLAP_OFFSET_FIELDNAME);
+        this.permissions = object.getStringValue(PERMISSIONS_FIELDNAME);
+        this.rightsCheckMethod = object.getStringValue(RIGHTS_CHECK_METHOD_FIELDNAME);
+        this.rightsCheckMethodParameter = object.getStringValue(RIGHTS_CHECK_METHOD_PARAMETER_FIELDNAME);
+        this.documentSpace = object.getStringValue(DOCUMENT_SPACE_FIELDNAME);
+    
+    }
 
     @Override
-    public XWikiDocument toXWikiDocument(XWikiDocument document)
+    public XWikiDocument toXWikiDocument(XWikiDocument inputdocument)
     {
-        this.document = document;
-        EntityReference documentReference = this.document.getDocumentReference();
-        EntityReference objectEntityReference = new EntityReference(
-            XCLASS,
-            EntityType.OBJECT,
-            documentReference
-            );
-        BaseObject object = this.document.getXObject(objectEntityReference);
-
-        //update the xobject with the collection properties
-        object.setStringValue(NAME_KEY, this.name);
-        object.setStringValue(PERMISSIONS_KEY, this.permissions);
-        object.setStringValue(EMBEDDINGMODEL_KEY, this.embeddingModel);
-
-        //save xdocument
+        this.xwikidocument = inputdocument;
         XWikiContext context = this.contextProvider.get();
+
+        //update an existing or new XWikiDocument with the collection properties
         try {
-            context.getWiki().saveDocument(this.document, context);
-        } catch (XWikiException e) {
-            // TODO Auto-generated catch block
+            EntityReference objectEntityReference = getObjectReference();
+            BaseObject object = this.xwikidocument.getXObject(objectEntityReference);
+            if (object == null) {
+                //create new xobject
+                object = this.xwikidocument.newXObject(objectEntityReference, context);
+                setXObjectValues(object);
+            }
+        } catch (Exception e) {
+            logger.error("Error setting the object: {}", e.getMessage());
             e.printStackTrace();
+            return null;
         }
 
-        return this.document;
+        //save the XWikiDocument
+        try {
+            context.getWiki().saveDocument(this.xwikidocument, context);
+            return this.xwikidocument;
+        } catch (XWikiException e) {
+            logger.error("Error saving document: {}", e.getMessage());
+            e.printStackTrace();
+            return null;
+        }
+
     }
+
+    //get XObject reference for the collection XClass
+    private EntityReference getObjectReference()
+    {
+        SpaceReference spaceRef = explicitStringSpaceRefResolver.resolve(XCLASS_SPACE_STRING);
+
+        EntityReference collectionClassRef = new EntityReference(XCLASS_NAME,
+                                    EntityType.DOCUMENT,
+                                    spaceRef
+                                );
+        return new EntityReference(XCLASS_NAME, EntityType.OBJECT, collectionClassRef);
+    }
+
+    //update the XObject with the collection properties
+    private BaseObject setXObjectValues(BaseObject object)
+    {
+        object.setStringValue(NAME_FIELDNAME, this.name);
+        object.setStringValue(EMBEDDINGMODEL_FIELDNAME, this.embeddingModel);
+        object.setStringValue(CHUNKING_METHOD_FIELDNAME, this.chunkingMethod);
+        object.setStringValue(CHUNKING_MAX_SIZE_FIELDNAME, this.chunkingMaxSize);
+        object.setStringValue(CHUNKING_OVERLAP_OFFSET_FIELDNAME, this.chunkingOverlapOffset);
+        object.setStringValue(PERMISSIONS_FIELDNAME, this.permissions);
+        object.setStringValue(RIGHTS_CHECK_METHOD_FIELDNAME, this.rightsCheckMethod);
+        object.setStringValue(RIGHTS_CHECK_METHOD_PARAMETER_FIELDNAME, this.rightsCheckMethodParameter);
+        object.setStringValue(DOCUMENT_SPACE_FIELDNAME, this.documentSpace);
+        return object;
+    }
+
 }
 

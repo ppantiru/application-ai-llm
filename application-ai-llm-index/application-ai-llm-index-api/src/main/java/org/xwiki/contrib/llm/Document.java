@@ -21,13 +21,16 @@ package org.xwiki.contrib.llm;
 
 import java.util.Optional;
 
-import com.xpn.xwiki.XWikiException;
+import org.xwiki.component.annotation.Role;
+
+import com.xpn.xwiki.doc.XWikiDocument;
 
 /**
  * Represents a document within the WAISE collection in the AI-LLM indexing system.
  *
  * @version $Id$
  */
+@Role
 public interface Document 
 {
     /**
@@ -158,9 +161,19 @@ public interface Document
     Optional<String> getProperty(String key);
 
     /**
-     * Saves the document values to XWikiDocument.
-     * @throws XWikiException
-     *
+     * Sets the properteis of a document based on the properties of the specified XWiki document's object.
+     * 
+     * @param xwikiDocument
+     * @return The updated document.
      */
-    void save() throws XWikiException;
+    Document toDocument(XWikiDocument xwikiDocument);
+
+    /**
+     * Sets the properties of a XWiki document's object based on the properties of the document.
+     * 
+     * @param xwikiDocument The XWiki document to update.
+     * @return The updated XWiki document.
+     */
+    XWikiDocument toXWikiDocument(XWikiDocument xwikiDocument);
+
 }

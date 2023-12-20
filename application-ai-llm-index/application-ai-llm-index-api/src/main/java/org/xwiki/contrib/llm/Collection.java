@@ -118,7 +118,7 @@ public interface Collection
      */
     boolean setEmbeddingModel(String embeddingModel);
 
-        /**
+    /**
      * Sets the properteis of a collection based on the properties of the specified XWiki document's object.
      * 
      * @param xwikiDocument
