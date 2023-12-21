@@ -54,50 +54,17 @@ import com.xpn.xwiki.objects.BaseObject;
 @InstantiationStrategy(ComponentInstantiationStrategy.PER_LOOKUP)
 public class DefaultCollection implements Collection
 {
-    /**
-     * name of the collection.
-     */
-    public static final String NAME_FIELDNAME = "name";
-    /**
-     * Ebedding model used by the collection.
-     */
-    public static final String EMBEDDINGMODEL_FIELDNAME = "embeddingModel";
-    /**
-     * The name of the field that stores the chunking method.
-     */
-    public static final String CHUNKING_METHOD_FIELDNAME = "chunkingMethod";
-    /**
-     * The name of the field that stores the chunking max size.
-     */
-    public static final String CHUNKING_MAX_SIZE_FIELDNAME = "chunkingMaxSize";
-    /**
-     * The name of the field that stores the chunking overlap offset.
-     */
-    public static final String CHUNKING_OVERLAP_OFFSET_FIELDNAME = "chunkingOverlapOffset";
-    /**
-     * Permissions for the collection.
-     */
-    public static final String PERMISSIONS_FIELDNAME = "permissions";
-    /**
-     * The name of the field that stores the rights check method.
-     */
-    public static final String RIGHTS_CHECK_METHOD_FIELDNAME = "rightsCheckMethod";
-    /**
-     * The name of the field that stores the rights check method parameter.
-     */
-    public static final String RIGHTS_CHECK_METHOD_PARAMETER_FIELDNAME = "rightsCheckMethodParam";
-    /**
-     * The name of the field that stores the location of the documents in XWiki.
-     */
-    public static final String DOCUMENT_SPACE_FIELDNAME = "documentSpace";
-    /**
-     * The name of the XClass that stors the collection information.
-     */
-    public static final String XCLASS_NAME = "CollectionsClass";
-    /**
-     * The space where the XClass that stores the collection information is located.
-     */
-    public static final String XCLASS_SPACE_STRING = "AILLMApp.Collections.Code";
+    private static final String NAME_FIELDNAME = "name";
+    private static final String EMBEDDINGMODEL_FIELDNAME = "embeddingModel";
+    private static final String CHUNKING_METHOD_FIELDNAME = "chunkingMethod";
+    private static final String CHUNKING_MAX_SIZE_FIELDNAME = "chunkingMaxSize";
+    private static final String CHUNKING_OVERLAP_OFFSET_FIELDNAME = "chunkingOverlapOffset";
+    private static final String PERMISSIONS_FIELDNAME = "permissions";
+    private static final String RIGHTS_CHECK_METHOD_FIELDNAME = "rightsCheckMethod";
+    private static final String RIGHTS_CHECK_METHOD_PARAMETER_FIELDNAME = "rightsCheckMethodParam";
+    private static final String DOCUMENT_SPACE_FIELDNAME = "documentSpace";
+    private static final String XCLASS_NAME = "CollectionsClass";
+    private static final String XCLASS_SPACE_STRING = "AILLMApp.Collections.Code";
 
     private String name;
     private String embeddingModel;
