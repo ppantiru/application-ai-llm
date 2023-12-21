@@ -110,8 +110,7 @@ public class DefaultCollection implements Collection
         this.chunkingOverlapOffset = "0";
         this.rightsCheckMethod = "jwt";
         this.rightsCheckMethodParameter = "";
-        String dSpace = "AILLMApp.Collections." + this.name + ".Documents";
-        this.documentSpace = dSpace;
+        this.documentSpace = "AILLMApp.Collections." + this.name + ".Documents";
         this.documents = new HashMap<>();
     }
 
