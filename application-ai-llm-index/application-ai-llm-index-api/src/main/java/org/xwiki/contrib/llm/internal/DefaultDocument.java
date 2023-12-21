@@ -23,7 +23,9 @@ package org.xwiki.contrib.llm.internal;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.annotation.InstantiationStrategy;
 import org.xwiki.component.descriptor.ComponentInstantiationStrategy;
+import org.xwiki.contrib.llm.Chunk;
 import org.xwiki.contrib.llm.Document;
+import org.xwiki.contrib.llm.StorageWorker;
 import org.xwiki.model.EntityType;
 import org.xwiki.model.reference.EntityReference;
 import org.xwiki.model.reference.SpaceReference;
@@ -35,7 +37,9 @@ import com.xpn.xwiki.XWikiException;
 import com.xpn.xwiki.doc.XWikiDocument;
 import com.xpn.xwiki.objects.BaseObject;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -209,12 +213,6 @@ public class DefaultDocument implements Document
     }
 
     @Override
-    public String getEmbeddings()
-    {
-        return embeddings;
-    }
-
-    @Override
     public void setID(String id)
     {
         this.id = id;
@@ -254,12 +252,6 @@ public class DefaultDocument implements Document
     public void setContent(String content)
     {
         this.content = content;
-    }
-
-    @Override
-    public void setEmbeddings(String embeddings)
-    {
-        this.embeddings = embeddings;
     }
 
     @Override
@@ -349,5 +341,15 @@ public class DefaultDocument implements Document
         return object;
     }
 
-    
+    @Override
+    public List<Chunk> chunkDocument()
+    {
+        StorageWorker worker = new StorageWorker();
+        Map<Integer, Chunk> chunks = worker.chunkDocument(this);
+        if (chunks == null) {
+            return new ArrayList<>();
+        } else {
+            return new ArrayList<>(chunks.values());
+        }
+    }
 }

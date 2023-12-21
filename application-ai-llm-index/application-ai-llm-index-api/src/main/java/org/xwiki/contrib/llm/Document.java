@@ -19,6 +19,7 @@
  */
 package org.xwiki.contrib.llm;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.xwiki.component.annotation.Role;
@@ -132,18 +133,11 @@ public interface Document
     void setContent(String content);
 
     /**
-     * Sets the embeddings of the document.
-     *
-     * @param embeddings The new embeddings
-     */
-    void setEmbeddings(String embeddings);
-
-    /**
-     * Retrieves the embeddings of the document.
+     * Process the document and chunk it into smaller pieces.
      * 
-     * @return the document's embeddings
+     * @return a list of chunks of the document
      */
-    String getEmbeddings();
+    List<Chunk> chunkDocument();
     
     /**
      * Retrieves the properties of the document.
