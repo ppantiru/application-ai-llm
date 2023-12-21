@@ -19,28 +19,36 @@
  */
 package org.xwiki.contrib.llm;
 
-import org.xwiki.component.annotation.Component;
+import java.util.List;
+
 import org.xwiki.component.annotation.Role;
+import org.xwiki.model.reference.WikiReference;
+import org.xwiki.stability.Unstable;
 import org.xwiki.user.UserReference;
 
-import java.util.Map;
-
 /**
- * Interface to retrieve Configuration of the LLM AI extension in XWiki instances.
+ * Provides access to the embedding models that are configured for the current wiki.
+ *
  * @version $Id$
+ * @since 0.3
  */
-@Component
+@Unstable
 @Role
-public interface GPTAPIConfigProvider 
+public interface EmbeddingModelManager
 {
     /**
-     * @param currentWiki The identifier of the wiki from which the request
-     *                    originated.
-     * @param userReference The user making the request.
-     * @return A map containing all the available {@link GPTAPIConfig} objects in
-     *         the specified wiki or an empty map if none exist.
-     * @throws GPTAPIException if something goes wrong. Will return an empty map as
-     *                         well in such case.
+     * @param wiki the wiki to get the models for
+     * @param id the id of the model to retrieve
+     * @param userReference the user reference to use for access control
+     * @return the model with the given id
      */
-    Map<String, GPTAPIConfig> getConfigObjects(String currentWiki, UserReference userReference) throws GPTAPIException;
+    EmbeddingModel getModel(WikiReference wiki, String id, UserReference userReference) throws GPTAPIException;
+
+    /**
+     * @param wiki the wiki to get the models for
+     * @param userReference the user reference to use for access control
+     * @return a list containing the descriptors of all configured models
+     */
+    List<EmbeddingModelDescriptor> getModelDescriptors(WikiReference wiki, UserReference userReference)
+        throws GPTAPIException;
 }

@@ -19,28 +19,37 @@
  */
 package org.xwiki.contrib.llm;
 
-import org.xwiki.component.annotation.Component;
-import org.xwiki.component.annotation.Role;
-import org.xwiki.user.UserReference;
+import java.util.function.Consumer;
 
-import java.util.Map;
+import org.xwiki.stability.Unstable;
 
 /**
- * Interface to retrieve Configuration of the LLM AI extension in XWiki instances.
+ * A chat model that can be used to process a chat request.
+ * <p>
+ *     Chat models could internally implement complex behavior including access control, rate limiting, or
+ *     retrieval-augmented generation.
+ * </p>
+ *
  * @version $Id$
+ * @since 0.3
  */
-@Component
-@Role
-public interface GPTAPIConfigProvider 
+@Unstable
+public interface ChatModel
 {
     /**
-     * @param currentWiki The identifier of the wiki from which the request
-     *                    originated.
-     * @param userReference The user making the request.
-     * @return A map containing all the available {@link GPTAPIConfig} objects in
-     *         the specified wiki or an empty map if none exist.
-     * @throws GPTAPIException if something goes wrong. Will return an empty map as
-     *                         well in such case.
+     * @param request the request to process
+     * @param consumer the consumer that will be called for every chunk that is received
      */
-    Map<String, GPTAPIConfig> getConfigObjects(String currentWiki, UserReference userReference) throws GPTAPIException;
+    void processStreaming(ChatRequest request, Consumer<ChatResponse> consumer) throws RequestError;
+
+    /**
+     * @param request the request to process
+     * @return the response
+     */
+    ChatResponse process(ChatRequest request) throws RequestError;
+
+    /**
+     * @return {@code true} if the model supports streaming, {@code false} otherwise
+     */
+    boolean supportsStreaming();
 }

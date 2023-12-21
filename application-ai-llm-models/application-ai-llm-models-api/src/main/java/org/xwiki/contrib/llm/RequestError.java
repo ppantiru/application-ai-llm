@@ -19,28 +19,48 @@
  */
 package org.xwiki.contrib.llm;
 
-import org.xwiki.component.annotation.Component;
-import org.xwiki.component.annotation.Role;
-import org.xwiki.user.UserReference;
-
-import java.util.Map;
+import org.xwiki.stability.Unstable;
 
 /**
- * Interface to retrieve Configuration of the LLM AI extension in XWiki instances.
+ * An error that occurred during a request.
+ *
  * @version $Id$
+ * @since 0.3
  */
-@Component
-@Role
-public interface GPTAPIConfigProvider 
+@Unstable
+public class RequestError extends Exception
 {
+    private final int code;
+
+    private final String message;
+
     /**
-     * @param currentWiki The identifier of the wiki from which the request
-     *                    originated.
-     * @param userReference The user making the request.
-     * @return A map containing all the available {@link GPTAPIConfig} objects in
-     *         the specified wiki or an empty map if none exist.
-     * @throws GPTAPIException if something goes wrong. Will return an empty map as
-     *                         well in such case.
+     * Creates a new request error.
+     *
+     * @param code the error code
+     * @param message the message
      */
-    Map<String, GPTAPIConfig> getConfigObjects(String currentWiki, UserReference userReference) throws GPTAPIException;
+    public RequestError(int code, String message)
+    {
+        super(code + ": " + message);
+
+        this.code = code;
+        this.message = message;
+    }
+
+    /**
+     * @return the error code
+     */
+    public int getCode()
+    {
+        return code;
+    }
+
+    /**
+     * @return the message without the error code
+     */
+    public String getPlainMessage()
+    {
+        return message;
+    }
 }

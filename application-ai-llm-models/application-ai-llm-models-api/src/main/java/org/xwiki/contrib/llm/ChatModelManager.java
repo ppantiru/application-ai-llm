@@ -19,28 +19,29 @@
  */
 package org.xwiki.contrib.llm;
 
-import org.xwiki.component.annotation.Component;
-import org.xwiki.component.annotation.Role;
-import org.xwiki.user.UserReference;
+import java.util.List;
 
-import java.util.Map;
+import org.xwiki.component.annotation.Role;
+import org.xwiki.stability.Unstable;
 
 /**
- * Interface to retrieve Configuration of the LLM AI extension in XWiki instances.
+ * Provides access to the chat models that are configured for the current wiki.
+ *
  * @version $Id$
+ * @since 0.3
  */
-@Component
+@Unstable
 @Role
-public interface GPTAPIConfigProvider 
+public interface ChatModelManager
 {
     /**
-     * @param currentWiki The identifier of the wiki from which the request
-     *                    originated.
-     * @param userReference The user making the request.
-     * @return A map containing all the available {@link GPTAPIConfig} objects in
-     *         the specified wiki or an empty map if none exist.
-     * @throws GPTAPIException if something goes wrong. Will return an empty map as
-     *                         well in such case.
+     * @param name the name of the model to retrieve
+     * @return the model with the given name
      */
-    Map<String, GPTAPIConfig> getConfigObjects(String currentWiki, UserReference userReference) throws GPTAPIException;
+    ChatModel getModel(String name) throws GPTAPIException;
+
+    /**
+     * @return a list of all configured models
+     */
+    List<String> getModels() throws GPTAPIException;
 }
