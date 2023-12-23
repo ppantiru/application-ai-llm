@@ -22,17 +22,25 @@ package org.xwiki.contrib.llm;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+
 import org.xwiki.contrib.llm.internal.DefaultDocument;
+import org.xwiki.model.reference.SpaceReferenceResolver;
 
 
 /**
- * This class is responsible for handling the document queue,
- * chunking the documents from the queue, computing the embeddings and storing them in solr.
+ * Utility class used in chunking the documents.
  * 
  * @version $Id$
  */
-public class StorageWorker
+public class Utils
 {
+
+    @Inject
+    @Named("current")
+    private SpaceReferenceResolver<String> explicitStringSpaceRefResolver;
+
     /**
      * This method is responsible for splitting the document into chunks.
      * 
@@ -40,7 +48,7 @@ public class StorageWorker
      * @return a Map of chunks
      */
     public Map<Integer, Chunk> chunkDocument(DefaultDocument document)
-    {
+    {      
         // get the document content
         String content = document.getContent();
     

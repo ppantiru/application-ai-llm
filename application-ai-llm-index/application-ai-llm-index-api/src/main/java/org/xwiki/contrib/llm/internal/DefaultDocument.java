@@ -25,7 +25,7 @@ import org.xwiki.component.annotation.InstantiationStrategy;
 import org.xwiki.component.descriptor.ComponentInstantiationStrategy;
 import org.xwiki.contrib.llm.Chunk;
 import org.xwiki.contrib.llm.Document;
-import org.xwiki.contrib.llm.StorageWorker;
+import org.xwiki.contrib.llm.Utils;
 import org.xwiki.model.EntityType;
 import org.xwiki.model.reference.EntityReference;
 import org.xwiki.model.reference.SpaceReference;
@@ -74,9 +74,6 @@ public class DefaultDocument implements Document
     private static final String XCLASS_NAME = "KiDocumentsClass";
     private static final String XCLASS_SPACE_STRING = "AILLMApp.KiDocuments.Code";
 
-    /**
-     * The execution, to get the context from it.
-     */
     @Inject 
     private Provider<XWikiContext> contextProvider;
 
@@ -344,7 +341,7 @@ public class DefaultDocument implements Document
     @Override
     public List<Chunk> chunkDocument()
     {
-        StorageWorker worker = new StorageWorker();
+        Utils worker = new Utils();
         Map<Integer, Chunk> chunks = worker.chunkDocument(this);
         if (chunks == null) {
             return new ArrayList<>();
