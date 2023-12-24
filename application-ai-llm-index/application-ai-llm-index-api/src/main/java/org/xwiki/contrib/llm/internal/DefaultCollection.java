@@ -97,14 +97,12 @@ public class DefaultCollection implements Collection
      * and empty document map.
      *
      * @param name The name of the collection.
-     * @param permissions The permissions string for the collection. 
-     * @param embeddingModel The embedding model used by the collection.
      */
-    public void initialize(String name, String permissions, String embeddingModel)
+    public void initialize(String name)
     {
         this.name = name;
-        this.permissions = permissions;
-        this.embeddingModel = embeddingModel;
+        this.permissions = "view";
+        this.embeddingModel = "bert";
         this.chunkingMethod = "maxTokens";
         this.chunkingMaxSize = "1000";
         this.chunkingOverlapOffset = "0";
@@ -204,13 +202,22 @@ public class DefaultCollection implements Collection
         return newDocument;
     }
 
+    @Override
+    public Document createDocument(String id) throws XWikiException
+    {
+        DefaultDocument newDocument = documentProvider.get();
+        newDocument.initialize(id);
+        documents.put(id, newDocument);
+        return newDocument;
+    }
+
     private String generateUniqueId()
     {
         return "document" + (documents.size() + 1);
     }
     
     @Override
-    public Collection toCollection(XWikiDocument document)
+    public Collection fromXWikiDocument(XWikiDocument document)
     {
         this.xwikidocument = document;
         EntityReference documentReference = this.xwikidocument.getDocumentReference();

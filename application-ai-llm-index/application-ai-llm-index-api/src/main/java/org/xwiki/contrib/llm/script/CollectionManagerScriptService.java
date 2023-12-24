@@ -54,16 +54,24 @@ public class CollectionManagerScriptService implements ScriptService
     }
 
     /**
+     * Pulls all collections from XWiki.
+     *
+     * @return boolean indicating success or failure
+     */
+    public boolean pullCollections()
+    {
+        return collectionManager.pullCollections();
+    }
+
+    /**
      * Creates a new collection.
      *
      * @param name the name of the collection
-     * @param permissions the permissions of the collection
-     * @param embeddingModel the embedding model of the collection
      * @return the created collection
      */
-    public DefaultCollection createCollection(String name, String permissions, String embeddingModel)
+    public DefaultCollection createCollection(String name)
     {
-        return collectionManager.createCollection(name, permissions, embeddingModel);
+        return collectionManager.createCollection(name);
     }
 
     /**

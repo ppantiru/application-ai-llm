@@ -19,6 +19,7 @@
  */
 package org.xwiki.contrib.llm;
 
+import java.util.AbstractMap;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Arrays;
@@ -65,11 +66,14 @@ public class IndexWorker implements EventListener
     private Logger logger;
 
     @Inject
+    private CollectionManager collectionManager;
+
+    @Inject
     @Named("current")
     private SpaceReferenceResolver<String> explicitStringSpaceRefResolver;
 
-    //the queue of documents to be processed as map of documentID and document
-    private Queue<String> linkedListDocumentQueue = new LinkedList<>();
+    //the queue of documents to be processed as key value pairs of documentID and the collection it belongs to
+    private Queue<AbstractMap.SimpleEntry<String, String>> keyValueQueue = new LinkedList<>();
     private boolean isProcessing;
     
     @Override public String getName()
@@ -87,38 +91,56 @@ public class IndexWorker implements EventListener
     {
         EntityReference documentClassReference = getObjectReference();
         this.logger.info("Event: {}", event);
-        XWikiDocument document = (XWikiDocument) source;
-        BaseObject documentObject = document.getXObject(documentClassReference);
-        this.logger.info("Document: {}", document.getDocumentReference());
+        XWikiDocument xdocument = (XWikiDocument) source;
+        BaseObject documentObject = xdocument.getXObject(documentClassReference);
+        this.logger.info("Document: {}", xdocument.getDocumentReference());
         if (documentObject != null) {
             try {
                 //Add document to the queue
                 String docID = documentObject.getStringValue("id");
-                linkedListDocumentQueue.add(docID);
+                String docCollection = documentObject.getStringValue("collection");
+                this.keyValueQueue.add(new AbstractMap.SimpleEntry<>(docID, docCollection));
                 this.logger.info("Document added to queue: {}", docID);
-                this.logger.info("Queue size: {}", linkedListDocumentQueue.size());
+                this.logger.info("Queue size: {}", keyValueQueue.size());
                 //if the queue is not empty and the worker is not processing, process the queue
-                if (!linkedListDocumentQueue.isEmpty() && !isProcessing) {
+                if (!keyValueQueue.isEmpty() && !isProcessing) {
                     isProcessing = true;
-                    processDocumentQueue();
+                    collectionManager.pullCollections();
+                    processDocumentQueue(xdocument);
                     isProcessing = false;
                 }
             } catch (Exception e) {
-                this.logger.error("Failure in comment listener", e);
+                this.logger.error("Failure in indexWorker listener", e);
             }
 
         }
     }
 
-    private void processDocumentQueue()
+    private void processDocumentQueue(XWikiDocument xdocument)
     {
+        logger.info("document {}", xdocument.getDocumentReference());
         //while queue is not empty, get first document, log it's ID and remove it from the queue
-        while (!linkedListDocumentQueue.isEmpty()) {
-            String documentID = linkedListDocumentQueue.peek();
-            this.logger.info("Processing document with ID: {}", documentID);
-            //get Document from XWikiDocument using documentID
-            
-            linkedListDocumentQueue.remove();
+        while (!this.keyValueQueue.isEmpty()) {
+            logger.info("collectionManager pull {}", collectionManager.listCollections());
+            logger.info("for document {}", xdocument.getDocumentReference());
+            AbstractMap.SimpleEntry<String, String> nextInLine = this.keyValueQueue.poll();
+            if (nextInLine != null) {
+                String key = nextInLine.getKey();
+                String value = nextInLine.getValue();
+                this.logger.info("Processing document: {}", key);
+                try {
+                    Document memDocument = collectionManager.getCollection(value).createDocument(key);
+                    memDocument = memDocument.toDocument(xdocument);
+                    List<Chunk> chunks = memDocument.chunkDocument();
+                    for (Chunk chunk : chunks) {
+                        logger.info("Chunks: docID {}, chunk index {}", chunk.getDocumentID(), chunk.getChunkIndex());
+                        //     chunk.computeEmbeddings();
+                        //     chunk.storeInSolr();
+                    }
+                } catch (Exception e) {
+                    this.logger.error("Failure to process document in indexWorker", e);
+                }
+            }          
         }
     }
 

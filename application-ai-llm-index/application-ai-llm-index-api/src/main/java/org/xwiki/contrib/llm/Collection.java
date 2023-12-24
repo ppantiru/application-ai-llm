@@ -95,6 +95,15 @@ public interface Collection
     Document createDocument() throws XWikiException;
 
     /**
+     * Creates a new document in the collection with a unique ID. The properties of the document can be set afterwards.
+     * 
+     * @param id The unique identifier to be assigned to the document.
+     * @return The newly created document.
+     * @throws XWikiException
+     */
+    Document createDocument(String id) throws XWikiException;
+
+    /**
      * Sets the name of the collection.
      * 
      * @param name The name of the collection.
@@ -124,7 +133,7 @@ public interface Collection
      * @param xwikiDocument
      * @return The updated collection.
      */
-    Collection toCollection(XWikiDocument xwikiDocument);
+    Collection fromXWikiDocument(XWikiDocument xwikiDocument);
 
     /**
      * Sets the properties of a XWiki document's object based on the properties of the collection.

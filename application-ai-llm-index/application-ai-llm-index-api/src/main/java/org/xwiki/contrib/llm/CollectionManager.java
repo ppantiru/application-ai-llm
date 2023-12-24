@@ -36,12 +36,17 @@ public interface CollectionManager
      * Creates a new collection.
      *
      * @param name the name of the collection
-     * @param permissions the permissions of the collection
-     * @param embeddingModel the embedding model of the collection
      * @return the created collection
      */
-    DefaultCollection createCollection(String name, String permissions, String embeddingModel);
+    DefaultCollection createCollection(String name);
     
+    /**
+     * Pulls all collections from XWiki.
+     *
+     * @return boolean indicating success or failure
+     */
+    boolean pullCollections();   
+
     /**
      * Lists all collections.
      *
