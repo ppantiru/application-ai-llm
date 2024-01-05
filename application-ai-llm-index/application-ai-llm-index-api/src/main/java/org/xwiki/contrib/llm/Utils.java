@@ -24,22 +24,29 @@ import java.util.Map;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.inject.Provider;
+import javax.inject.Singleton;
 
+import org.xwiki.component.annotation.Component;
 import org.xwiki.contrib.llm.internal.DefaultDocument;
 import org.xwiki.model.reference.SpaceReferenceResolver;
-
 
 /**
  * Utility class used in chunking the documents.
  * 
  * @version $Id$
  */
+@Component(roles = Utils.class)
+@Singleton
 public class Utils
 {
 
     @Inject
     @Named("current")
     private SpaceReferenceResolver<String> explicitStringSpaceRefResolver;
+
+    @Inject 
+    private Provider<Chunk> chunkProvider;
 
     /**
      * This method is responsible for splitting the document into chunks.
@@ -66,7 +73,8 @@ public class Utils
     
             // Extract the chunk content
             String chunkContent = content.substring(start, end);
-            Chunk chunk = new Chunk(document.getID(),
+            Chunk chunk = chunkProvider.get();
+            chunk.initialize(document.getID(),
                                     document.getLanguage(),
                                     chunkIndex, start, end, chunkContent);
             chunks.put(chunkIndex, chunk);

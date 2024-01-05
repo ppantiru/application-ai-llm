@@ -19,11 +19,27 @@
  */
 package org.xwiki.contrib.llm;
 
+import java.util.List;
+
+import javax.inject.Inject;
+import javax.inject.Provider;
+
+import org.slf4j.Logger;
+import org.xwiki.component.annotation.Component;
+import org.xwiki.component.annotation.InstantiationStrategy;
+import org.xwiki.component.descriptor.ComponentInstantiationStrategy;
+import org.xwiki.model.reference.WikiReference;
+import org.xwiki.user.UserReference;
+import org.xwiki.user.CurrentUserReference;
+
+import com.xpn.xwiki.XWikiContext;
 /**
  * The chunk will be used to store the information in Solr.
  * 
  * @version $Id$
  */
+@Component(roles = Chunk.class)
+@InstantiationStrategy(ComponentInstantiationStrategy.PER_LOOKUP)
 public class Chunk
 {
     private String documentID;
@@ -32,10 +48,19 @@ public class Chunk
     private int posFirstChar;
     private int posLastChar;
     private String content;
-    private String embeddings;
+    private double[] embeddings;
 
+    @Inject 
+    private EmbeddingModelManager embeddingModelManager;
+
+    @Inject
+    private Logger logger;
+
+    @Inject 
+    private Provider<XWikiContext> contextProvider;
+    
     /**
-     * Constructor.
+     * Initialize the chunk.
      *  
      * @param documentID the document ID
      * @param language the language
@@ -44,7 +69,7 @@ public class Chunk
      * @param posLastChar the position of the last character
      * @param content the content
      */
-    public Chunk(String documentID, String language, int chunkIndex, int posFirstChar, int posLastChar,
+    public void initialize(String documentID, String language, int chunkIndex, int posFirstChar, int posLastChar,
         String content)
     {
         this.documentID = documentID;
@@ -53,7 +78,7 @@ public class Chunk
         this.posFirstChar = posFirstChar;
         this.posLastChar = posLastChar;
         this.content = content;
-        this.embeddings = "";
+        this.embeddings = null;
     }
 
     /**
@@ -121,7 +146,7 @@ public class Chunk
      *
      * @return the embeddings
      */
-    public String getEmbeddings()
+    public double[] getEmbeddings()
     {
         return embeddings;
     }
@@ -189,10 +214,22 @@ public class Chunk
     /**
      * Setter for the embeddings.
      *
-     * @param embeddings the embeddings
+     * @param text the text to be embedded
      */
-    public void setEmbeddings(String embeddings)
+    public void computeEmbeddings(String text)
     {
-        this.embeddings = embeddings;
+        try {
+            XWikiContext context = this.contextProvider.get();
+            WikiReference wikiReference = context.getWikiReference();
+            UserReference userReference = CurrentUserReference.INSTANCE;
+            List<EmbeddingModelDescriptor> embeddingModelDescriptors = embeddingModelManager
+                    .getModelDescriptors(wikiReference, userReference);
+            EmbeddingModel embeddingModel = embeddingModelManager
+                    .getModel(wikiReference, embeddingModelDescriptors.get(0).getId(), userReference);
+            this.embeddings = embeddingModel.embed(text);
+        } catch (Exception e) {
+            logger.error("Failure to compute embeddings.", e);
+            this.embeddings = null;
+        }
     }
 }

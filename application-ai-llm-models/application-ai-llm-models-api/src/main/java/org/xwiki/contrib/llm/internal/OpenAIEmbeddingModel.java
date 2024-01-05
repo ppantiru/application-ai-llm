@@ -38,7 +38,6 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.theokanning.openai.OpenAiResponse;
 import com.theokanning.openai.embedding.Embedding;
-import com.theokanning.openai.embedding.EmbeddingRequest;
 
 /**
  * Implementation of {@link EmbeddingModel} that uses the OpenAI API.
@@ -78,10 +77,10 @@ public class OpenAIEmbeddingModel implements EmbeddingModel
     @Override
     public List<double[]> embed(List<String> texts) throws RequestError
     {
-        EmbeddingRequest request = new EmbeddingRequest(this.id, texts, null);
+        String requestBody = getRequestBody(this.id, texts, "float");
 
         try {
-            return this.requestHelper.post(this.config, "embeddings", request, response -> {
+            return this.requestHelper.post(this.config, "embeddings", requestBody, response -> {
                 if (response.getCode() != 200) {
                     throw new IOException("Response code is " + response.getCode());
                 }
@@ -109,4 +108,18 @@ public class OpenAIEmbeddingModel implements EmbeddingModel
             throw new RequestError(500, e.getMessage());
         }
     }
+
+    /**
+     * @param model the model to use
+     * @param inputs the inputs to embed
+     * @param encodingFormat the encoding format
+     * @return the request body
+     */
+    public String getRequestBody(String model, List<String> inputs, String encodingFormat)
+    {
+        return String.format("{\"model\": \"%s\", \"input\": \"%s\", \"encoding_format\": \"%s\"}", 
+                            model, inputs, encodingFormat);
+    } 
+
 }
+

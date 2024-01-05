@@ -73,4 +73,28 @@ public class RequestHelper
             return httpClient.execute(httpPost, responseHandler);
         }
     }
+
+    /**
+     * Perform a POST request.
+     *
+     * @param config the configuration that provides the URL and the authentication token
+     * @param path the path of the API endpoint
+     * @param body the string to send in the body of the request
+     * @param responseHandler the callback that handles the response
+     * @return the value returned by the response handler
+     * @param <R> the return type
+     * @throws IOException if the request fails
+     */
+    public <R> R post(GPTAPIConfig config, String path, String body,
+        HttpClientResponseHandler<? extends R> responseHandler) throws IOException
+    {
+        try (CloseableHttpClient httpClient = HttpClients.createSystem()) {
+            HttpPost httpPost = new HttpPost(config.getURL() + path);
+            httpPost.setHeader(HttpHeaders.AUTHORIZATION, BEARER + config.getToken());
+            httpPost.setHeader(HttpHeaders.ACCEPT, ContentType.APPLICATION_JSON);
+            httpPost.setHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON);
+            httpPost.setEntity(new StringEntity(body));
+            return httpClient.execute(httpPost, responseHandler);
+        }
+    }
 }

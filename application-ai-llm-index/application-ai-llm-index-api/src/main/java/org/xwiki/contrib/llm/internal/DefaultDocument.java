@@ -81,6 +81,9 @@ public class DefaultDocument implements Document
     private Logger logger;
 
     @Inject
+    private Utils utils;
+
+    @Inject
     @Named("current")
     private SpaceReferenceResolver<String> explicitStringSpaceRefResolver;
 
@@ -341,12 +344,12 @@ public class DefaultDocument implements Document
     @Override
     public List<Chunk> chunkDocument()
     {
-        Utils worker = new Utils();
-        Map<Integer, Chunk> chunks = worker.chunkDocument(this);
+        Map<Integer, Chunk> chunks = utils.chunkDocument(this);
         if (chunks == null) {
             return new ArrayList<>();
         } else {
             return new ArrayList<>(chunks.values());
         }
     }
+    
 }
