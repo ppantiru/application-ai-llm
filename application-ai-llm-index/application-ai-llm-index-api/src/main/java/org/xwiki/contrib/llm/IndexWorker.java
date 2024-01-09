@@ -44,7 +44,7 @@ import com.xpn.xwiki.internal.event.XObjectUpdatedEvent;
 import com.xpn.xwiki.internal.event.XObjectPropertyUpdatedEvent;
 
 import org.slf4j.Logger;
-import org.xwiki.bridge.event.DocumentCreatingEvent;
+import org.xwiki.bridge.event.DocumentCreatedEvent;
 import org.xwiki.bridge.event.DocumentUpdatedEvent;
 import org.xwiki.component.annotation.Component;
 
@@ -84,7 +84,7 @@ public class IndexWorker implements EventListener
     @Override public List<Event> getEvents()
     {
         return Arrays.<Event>asList(new XObjectAddedEvent(), new XObjectUpdatedEvent(),
-            new XObjectPropertyUpdatedEvent(), new DocumentCreatingEvent(), new DocumentUpdatedEvent());
+            new XObjectPropertyUpdatedEvent(), new DocumentCreatedEvent(), new DocumentUpdatedEvent());
     }
 
     @Override public void onEvent(Event event, Object source, Object data)
@@ -134,8 +134,8 @@ public class IndexWorker implements EventListener
                     List<Chunk> chunks = memDocument.chunkDocument();
                     for (Chunk chunk : chunks) {
                         logger.info("Chunks: docID {}, chunk index {}", chunk.getDocumentID(), chunk.getChunkIndex());
-                        //     chunk.computeEmbeddings();
-                        //     chunk.storeInSolr();
+                        chunk.computeEmbeddings(chunk.getContent());
+                        SolrConnector.addDocument(chunk, generateChunkID(chunk.getDocumentID(), chunk.getChunkIndex()));
                     }
                 } catch (Exception e) {
                     this.logger.error("Failure to process document in indexWorker", e);
@@ -155,4 +155,11 @@ public class IndexWorker implements EventListener
                                 );
         return new EntityReference(XCLASS_NAME, EntityType.OBJECT, collectionClassRef);
     }
+
+    //generate unique id for chunks
+    private String generateChunkID(String docID, int chunkIndex)
+    {
+        return docID + "_" + chunkIndex;
+    }
+
 }

@@ -70,7 +70,6 @@ public class DefaultDocument implements Document
     private static final String URL_KEY = "URL";
     private static final String MIMETYPE_KEY = "mimetype";
     private static final String CONTENT_KEY = "content";
-    private static final String EMBEDDINGS_KEY = "embeddings";
     private static final String XCLASS_NAME = "KiDocumentsClass";
     private static final String XCLASS_SPACE_STRING = "AILLMApp.KiDocuments.Code";
 
@@ -94,7 +93,6 @@ public class DefaultDocument implements Document
     private String url;
     private String mimetype;
     private String content;
-    private String embeddings;
     
     private XWikiDocument xwikidocument;
     
@@ -111,7 +109,6 @@ public class DefaultDocument implements Document
         this.url = "";
         this.mimetype = "";
         this.content = "";
-        this.embeddings = "";
     }
 
     @Override
@@ -125,7 +122,6 @@ public class DefaultDocument implements Document
         properties.put(URL_KEY, url);
         properties.put(MIMETYPE_KEY, mimetype);
         properties.put(CONTENT_KEY, content);
-        properties.put(EMBEDDINGS_KEY, embeddings);
         return properties;
     }
 
@@ -160,9 +156,6 @@ public class DefaultDocument implements Document
                 break;
             case CONTENT_KEY:
                 property = Optional.ofNullable(content);
-                break;
-            case EMBEDDINGS_KEY:
-                property = Optional.ofNullable(embeddings);
                 break;
             default:
                 property = Optional.empty();
