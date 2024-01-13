@@ -34,6 +34,15 @@ import org.xwiki.component.annotation.Role;
 public interface Collection
 {
     /**
+     * The name of the XClass that represents a collection.
+     */
+    String XCLASS_NAME = "CollectionsClass";
+    /**
+     * The space of the XClass that represents a collection.
+     */
+    String XCLASS_SPACE_STRING = "AI.Collections.Code";
+
+    /**
      * Gets the name of the collection.
      * 
      * @return The name of the collection.

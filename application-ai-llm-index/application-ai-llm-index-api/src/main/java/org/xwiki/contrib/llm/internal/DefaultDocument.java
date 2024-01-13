@@ -70,8 +70,7 @@ public class DefaultDocument implements Document
     private static final String URL_KEY = "URL";
     private static final String MIMETYPE_KEY = "mimetype";
     private static final String CONTENT_KEY = "content";
-    private static final String XCLASS_NAME = "KiDocumentsClass";
-    private static final String XCLASS_SPACE_STRING = "AILLMApp.KiDocuments.Code";
+
 
     @Inject 
     private Provider<XWikiContext> contextProvider;

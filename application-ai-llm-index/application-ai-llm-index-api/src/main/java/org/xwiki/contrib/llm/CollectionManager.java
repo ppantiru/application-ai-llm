@@ -68,4 +68,16 @@ public interface CollectionManager
      * @return boolean indicating success or failure
      */
     boolean deleteCollection(String name);
+
+    /**
+     * Clears the solr core of all data.
+     * 
+     * @return boolean indicating success or failure
+     */
+    boolean clearIndexCore();
+
+    /**
+     * Clears the memory of the collection manager.
+     */
+    void clearMemory();
 }

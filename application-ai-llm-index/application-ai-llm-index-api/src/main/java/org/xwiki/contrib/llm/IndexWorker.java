@@ -39,10 +39,6 @@ import org.xwiki.model.reference.SpaceReferenceResolver;
 import com.xpn.xwiki.doc.XWikiDocument;
 import com.xpn.xwiki.objects.BaseObject;
 
-import com.xpn.xwiki.internal.event.XObjectAddedEvent;
-import com.xpn.xwiki.internal.event.XObjectUpdatedEvent;
-import com.xpn.xwiki.internal.event.XObjectPropertyUpdatedEvent;
-
 import org.slf4j.Logger;
 import org.xwiki.bridge.event.DocumentCreatedEvent;
 import org.xwiki.bridge.event.DocumentUpdatedEvent;
@@ -59,8 +55,6 @@ import org.xwiki.component.annotation.Component;
 @Singleton
 public class IndexWorker implements EventListener
 {
-    private static final String XCLASS_NAME = "KiDocumentsClass";
-    private static final String XCLASS_SPACE_STRING = "AILLMApp.KiDocuments.Code";
  
     @Inject
     private Logger logger;
@@ -83,8 +77,7 @@ public class IndexWorker implements EventListener
     
     @Override public List<Event> getEvents()
     {
-        return Arrays.<Event>asList(new XObjectAddedEvent(), new XObjectUpdatedEvent(),
-            new XObjectPropertyUpdatedEvent(), new DocumentCreatedEvent(), new DocumentUpdatedEvent());
+        return Arrays.<Event>asList(new DocumentCreatedEvent(), new DocumentUpdatedEvent());
     }
 
     @Override public void onEvent(Event event, Object source, Object data)
@@ -107,6 +100,7 @@ public class IndexWorker implements EventListener
                     isProcessing = true;
                     collectionManager.pullCollections();
                     processDocumentQueue(xdocument);
+                    collectionManager.clearMemory();
                     isProcessing = false;
                 }
             } catch (Exception e) {
@@ -134,7 +128,7 @@ public class IndexWorker implements EventListener
                     List<Chunk> chunks = memDocument.chunkDocument();
                     for (Chunk chunk : chunks) {
                         logger.info("Chunks: docID {}, chunk index {}", chunk.getDocumentID(), chunk.getChunkIndex());
-                        chunk.computeEmbeddings(chunk.getContent());
+                        chunk.computeEmbeddings();
                         SolrConnector.addDocument(chunk, generateChunkID(chunk.getDocumentID(), chunk.getChunkIndex()));
                     }
                 } catch (Exception e) {
@@ -147,13 +141,13 @@ public class IndexWorker implements EventListener
     //get XObject reference for the collection XClass
     private EntityReference getObjectReference()
     {
-        SpaceReference spaceRef = explicitStringSpaceRefResolver.resolve(XCLASS_SPACE_STRING);
+        SpaceReference spaceRef = explicitStringSpaceRefResolver.resolve(Document.XCLASS_SPACE_STRING);
 
-        EntityReference collectionClassRef = new EntityReference(XCLASS_NAME,
+        EntityReference collectionClassRef = new EntityReference(Document.XCLASS_NAME,
                                     EntityType.DOCUMENT,
                                     spaceRef
                                 );
-        return new EntityReference(XCLASS_NAME, EntityType.OBJECT, collectionClassRef);
+        return new EntityReference(Document.XCLASS_NAME, EntityType.OBJECT, collectionClassRef);
     }
 
     //generate unique id for chunks

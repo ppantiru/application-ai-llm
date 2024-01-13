@@ -35,7 +35,7 @@
         <xwiki.jacoco.instructionRatio>0.00</xwiki.jacoco.instructionRatio>
         <checkstyle.suppressions.location>${basedir}/src/main/checkstyle/checkstyle-suppressions.xml</checkstyle.suppressions.location>
         <xwiki.extension.features>
-          org.xwiki.contrib.llm:application-llm-api
+          org.xwiki.contrib.llm:application-llm-models-api
         </xwiki.extension.features>
     </properties>
     <dependencies>

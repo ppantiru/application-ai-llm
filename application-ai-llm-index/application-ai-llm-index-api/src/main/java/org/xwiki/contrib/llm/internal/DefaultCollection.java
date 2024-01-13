@@ -63,8 +63,6 @@ public class DefaultCollection implements Collection
     private static final String RIGHTS_CHECK_METHOD_FIELDNAME = "rightsCheckMethod";
     private static final String RIGHTS_CHECK_METHOD_PARAMETER_FIELDNAME = "rightsCheckMethodParam";
     private static final String DOCUMENT_SPACE_FIELDNAME = "documentSpace";
-    private static final String XCLASS_NAME = "CollectionsClass";
-    private static final String XCLASS_SPACE_STRING = "AILLMApp.Collections.Code";
 
     private String name;
     private String embeddingModel;
@@ -108,7 +106,7 @@ public class DefaultCollection implements Collection
         this.chunkingOverlapOffset = "0";
         this.rightsCheckMethod = "jwt";
         this.rightsCheckMethodParameter = "";
-        this.documentSpace = "AILLMApp.Collections." + this.name + ".Documents";
+        this.documentSpace = "AI.Collections." + this.name + ".Documents";
         this.documents = new HashMap<>();
     }
 

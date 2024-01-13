@@ -34,6 +34,16 @@ import com.xpn.xwiki.doc.XWikiDocument;
 @Role
 public interface Document 
 {
+
+    /**
+     * The name of the XClass that represents a document.
+     */
+    String XCLASS_NAME = "DocumentsClass";
+    /**
+     * The space of the XClass that represents a document.
+     */
+    String XCLASS_SPACE_STRING = "AI.Documents.Code";
+
     /**
      * Retrieves the unique identifier of the document.
      *

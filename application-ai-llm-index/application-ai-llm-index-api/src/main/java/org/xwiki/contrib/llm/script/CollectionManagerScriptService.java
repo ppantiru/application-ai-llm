@@ -44,6 +44,17 @@ public class CollectionManagerScriptService implements ScriptService
     private CollectionManager collectionManager;
 
     /**
+     * Creates a new collection.
+     *
+     * @param name the name of the collection
+     * @return the created collection
+     */
+    public DefaultCollection createCollection(String name)
+    {
+        return collectionManager.createCollection(name);
+    }
+    
+    /**
      * Lists all collections.
      *
      * @return a list of all collections
@@ -61,17 +72,6 @@ public class CollectionManagerScriptService implements ScriptService
     public boolean pullCollections()
     {
         return collectionManager.pullCollections();
-    }
-
-    /**
-     * Creates a new collection.
-     *
-     * @param name the name of the collection
-     * @return the created collection
-     */
-    public DefaultCollection createCollection(String name)
-    {
-        return collectionManager.createCollection(name);
     }
 
     /**
@@ -93,5 +93,15 @@ public class CollectionManagerScriptService implements ScriptService
     public boolean deleteCollection(String name)
     {
         return collectionManager.deleteCollection(name);
+    }
+
+    /**
+     * Clears the solr core of all data.
+     * 
+     * @return boolean indicating success or failure
+     */
+    public boolean clearIndexCore()
+    {
+        return collectionManager.clearIndexCore();
     }
 }

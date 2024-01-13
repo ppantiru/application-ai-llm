@@ -24,7 +24,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.xwiki.contrib.llm.Collection;
 import org.xwiki.contrib.llm.CollectionManager;
+import org.xwiki.contrib.llm.SolrConnector;
 import org.xwiki.model.EntityType;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.model.reference.DocumentReferenceResolver;
@@ -57,9 +59,6 @@ import org.slf4j.Logger;
 @Singleton
 public class DefaultCollectionManager implements CollectionManager
 {
-    private static final String XCLASS_NAME = "CollectionsClass";
-    private static final String XCLASS_SPACE_STRING = "AILLMApp.Collections.Code";
-
     @Inject
     private Logger logger;
     
@@ -101,10 +100,12 @@ public class DefaultCollectionManager implements CollectionManager
     @Override
     public boolean pullCollections()
     {
+        String templateDoc = Collection.XCLASS_SPACE_STRING + ".CollectionsTemplate";
+        String collectionClass = Collection.XCLASS_SPACE_STRING + "." + Collection.XCLASS_NAME;
         logger.info("Pulling collections from XWiki...");
         String hql = "select doc.fullName from XWikiDocument doc, BaseObject obj "
-                   + "where doc.fullName=obj.name and obj.className='AILLMApp.Collections.Code.CollectionsClass'"
-                   + "and doc.fullName <> 'AILLMApp.Collections.Code.CollectionsTemplate'";
+                   + "where doc.fullName=obj.name and obj.className='" + collectionClass + "' "
+                   + "and doc.fullName <> '" + templateDoc + "'";
 
         try {
             Query query = queryManager.createQuery(hql, Query.HQL);
@@ -113,25 +114,29 @@ public class DefaultCollectionManager implements CollectionManager
             for (String docName : docNames) {
                 XWikiContext context = contextProvider.get();
                 DocumentReference docRef = documentReferenceResolver.resolve(docName);
-                try {
-                    XWikiDocument xwikiDoc = context.getWiki().getDocument(docRef, context);
-                    EntityReference objectEntityReference = getObjectReference();
-                    BaseObject object = xwikiDoc.getXObject(objectEntityReference);
-                    String collectionName = object.getStringValue("name");
-                    DefaultCollection newCollection = createCollection(collectionName);
-                    newCollection.fromXWikiDocument(xwikiDoc);
-                } catch (Exception e) {
-                    logger.warn("Failed to create collection {}", docName);
-                }
+                processXWikiDocument(docRef, context);
             }
+
             return true;
         } catch (Exception e) {
-            // Handle exceptions appropriately
             e.printStackTrace();
         }
         return false;
     }
-
+    
+    private void processXWikiDocument(DocumentReference docRef, XWikiContext context)
+    {
+        try {
+            XWikiDocument xwikiDoc = context.getWiki().getDocument(docRef, context);
+            EntityReference objectEntityReference = getObjectReference();
+            BaseObject object = xwikiDoc.getXObject(objectEntityReference);
+            String collectionName = object.getStringValue("name");
+            DefaultCollection newCollection = createCollection(collectionName);
+            newCollection.fromXWikiDocument(xwikiDoc);
+        } catch (Exception e) {
+            logger.warn("Failed to create collection {}", docRef.getName());
+        }
+    }
     @Override
     public List<DefaultCollection> listCollections()
     {
@@ -154,15 +159,36 @@ public class DefaultCollectionManager implements CollectionManager
         return false;
     }
 
+    @Override
+    public boolean clearIndexCore()
+    {
+        try {
+            SolrConnector.clearIndexCore();
+            return true;
+        } catch (Exception e) {
+            logger.error("Failed to clear index core", e);
+            return false;
+        } 
+    }
+
     //get XObject reference for the collection XClass
     private EntityReference getObjectReference()
     {
-        SpaceReference spaceRef = explicitStringSpaceRefResolver.resolve(XCLASS_SPACE_STRING);
+        SpaceReference spaceRef = explicitStringSpaceRefResolver.resolve(Collection.XCLASS_SPACE_STRING);
 
-        EntityReference collectionClassRef = new EntityReference(XCLASS_NAME,
+        EntityReference collectionClassRef = new EntityReference(Collection.XCLASS_NAME,
                                     EntityType.DOCUMENT,
                                     spaceRef
                                 );
-        return new EntityReference(XCLASS_NAME, EntityType.OBJECT, collectionClassRef);
+        return new EntityReference(Collection.XCLASS_NAME, EntityType.OBJECT, collectionClassRef);
     }
+
+    /**
+     * Clears the in-memory cache of collections.
+     */
+    public void clearMemory()
+    {
+        collections.clear();
+    }
+
 }
