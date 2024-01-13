@@ -79,6 +79,27 @@ public interface Collection
     String getEmbeddingModel();
 
     /**
+     * Gets the chunking method used by the collection.
+     * 
+     * @return A string representing the chunking method.
+     */
+    String getChunkingMethod();
+
+    /**
+     * Gets the maximum size of a chunk.
+     * 
+     * @return The maximum size of a chunk.
+     */
+    int getChunkingMaxSize();
+
+    /**
+     * Gets the overlap offset of a chunk.
+     * 
+     * @return The overlap offset of a chunk.
+     */
+    int getChunkingOverlapOffset();
+
+    /**
      * Removes a document from the collection. Optionally, it can also delete the document.
      * 
      * @param id The unique identifier of the document to be removed.

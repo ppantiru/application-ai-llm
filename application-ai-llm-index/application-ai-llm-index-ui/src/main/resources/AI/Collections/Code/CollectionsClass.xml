@@ -81,7 +81,7 @@
       <unmodifiable>0</unmodifiable>
       <validationMessage/>
       <validationRegExp/>
-      <values>sectionChunking=Section-based chunking|characterBasedChunking=Character-based chunking</values>
+      <values>sectionChunking=Section-based chunking|maxChars=Max characters chunking</values>
       <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
     </chunkingMethod>
     <chunkingOverlapOffset>

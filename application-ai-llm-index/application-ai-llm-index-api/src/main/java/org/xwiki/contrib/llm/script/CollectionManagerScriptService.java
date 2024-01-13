@@ -26,8 +26,8 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 
 import org.xwiki.component.annotation.Component;
+import org.xwiki.contrib.llm.Collection;
 import org.xwiki.contrib.llm.CollectionManager;
-import org.xwiki.contrib.llm.internal.DefaultCollection;
 import org.xwiki.script.service.ScriptService;
 
 /**
@@ -49,7 +49,7 @@ public class CollectionManagerScriptService implements ScriptService
      * @param name the name of the collection
      * @return the created collection
      */
-    public DefaultCollection createCollection(String name)
+    public Collection createCollection(String name)
     {
         return collectionManager.createCollection(name);
     }
@@ -59,7 +59,7 @@ public class CollectionManagerScriptService implements ScriptService
      *
      * @return a list of all collections
      */
-    public List<DefaultCollection> listCollections()
+    public List<Collection> listCollections()
     {
         return collectionManager.listCollections();
     }
@@ -80,7 +80,7 @@ public class CollectionManagerScriptService implements ScriptService
      * @param name the name of the collection
      * @return the collection with the given name
      */
-    public DefaultCollection getCollection(String name)
+    public Collection getCollection(String name)
     {
         return collectionManager.getCollection(name);
     }

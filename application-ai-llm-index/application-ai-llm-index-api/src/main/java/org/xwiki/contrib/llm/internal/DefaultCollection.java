@@ -67,8 +67,8 @@ public class DefaultCollection implements Collection
     private String name;
     private String embeddingModel;
     private String chunkingMethod;
-    private String chunkingMaxSize;
-    private String chunkingOverlapOffset;
+    private int chunkingMaxSize;
+    private int chunkingOverlapOffset;
     private String permissions;
     private String rightsCheckMethod;
     private String rightsCheckMethodParameter;
@@ -101,9 +101,9 @@ public class DefaultCollection implements Collection
         this.name = name;
         this.permissions = "view";
         this.embeddingModel = "bert";
-        this.chunkingMethod = "maxTokens";
-        this.chunkingMaxSize = "1000";
-        this.chunkingOverlapOffset = "0";
+        this.chunkingMethod = "maxChars";
+        this.chunkingMaxSize = 1000;
+        this.chunkingOverlapOffset = 0;
         this.rightsCheckMethod = "jwt";
         this.rightsCheckMethodParameter = "";
         this.documentSpace = "AI.Collections." + this.name + ".Documents";
@@ -138,6 +138,24 @@ public class DefaultCollection implements Collection
     public String getEmbeddingModel()
     {
         return embeddingModel;
+    }
+
+    @Override
+    public String getChunkingMethod()
+    {
+        return chunkingMethod;
+    }
+
+    @Override
+    public int getChunkingMaxSize()
+    {
+        return chunkingMaxSize;
+    }
+
+    @Override
+    public int getChunkingOverlapOffset()
+    {
+        return chunkingOverlapOffset;
     }
 
     @Override
@@ -236,8 +254,8 @@ public class DefaultCollection implements Collection
         this.name = object.getStringValue(NAME_FIELDNAME);
         this.embeddingModel = object.getStringValue(EMBEDDINGMODEL_FIELDNAME);
         this.chunkingMethod = object.getStringValue(CHUNKING_METHOD_FIELDNAME);
-        this.chunkingMaxSize = object.getStringValue(CHUNKING_MAX_SIZE_FIELDNAME);
-        this.chunkingOverlapOffset = object.getStringValue(CHUNKING_OVERLAP_OFFSET_FIELDNAME);
+        this.chunkingMaxSize = object.getIntValue(CHUNKING_MAX_SIZE_FIELDNAME);
+        this.chunkingOverlapOffset = object.getIntValue(CHUNKING_OVERLAP_OFFSET_FIELDNAME);
         this.permissions = object.getStringValue(PERMISSIONS_FIELDNAME);
         this.rightsCheckMethod = object.getStringValue(RIGHTS_CHECK_METHOD_FIELDNAME);
         this.rightsCheckMethodParameter = object.getStringValue(RIGHTS_CHECK_METHOD_PARAMETER_FIELDNAME);
@@ -296,8 +314,8 @@ public class DefaultCollection implements Collection
         object.setStringValue(NAME_FIELDNAME, this.name);
         object.setStringValue(EMBEDDINGMODEL_FIELDNAME, this.embeddingModel);
         object.setStringValue(CHUNKING_METHOD_FIELDNAME, this.chunkingMethod);
-        object.setStringValue(CHUNKING_MAX_SIZE_FIELDNAME, this.chunkingMaxSize);
-        object.setStringValue(CHUNKING_OVERLAP_OFFSET_FIELDNAME, this.chunkingOverlapOffset);
+        object.setIntValue(CHUNKING_MAX_SIZE_FIELDNAME, this.chunkingMaxSize);
+        object.setIntValue(CHUNKING_OVERLAP_OFFSET_FIELDNAME, this.chunkingOverlapOffset);
         object.setStringValue(PERMISSIONS_FIELDNAME, this.permissions);
         object.setStringValue(RIGHTS_CHECK_METHOD_FIELDNAME, this.rightsCheckMethod);
         object.setStringValue(RIGHTS_CHECK_METHOD_PARAMETER_FIELDNAME, this.rightsCheckMethodParameter);

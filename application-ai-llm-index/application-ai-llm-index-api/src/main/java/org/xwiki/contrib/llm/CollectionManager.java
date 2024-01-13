@@ -22,7 +22,6 @@ package org.xwiki.contrib.llm;
 import java.util.List;
 
 import org.xwiki.component.annotation.Role;
-import org.xwiki.contrib.llm.internal.DefaultCollection;
 
 /**
  * This interface manages collections.
@@ -38,7 +37,7 @@ public interface CollectionManager
      * @param name the name of the collection
      * @return the created collection
      */
-    DefaultCollection createCollection(String name);
+    Collection createCollection(String name);
     
     /**
      * Pulls all collections from XWiki.
@@ -52,7 +51,7 @@ public interface CollectionManager
      *
      * @return a list of all collections
      */
-    List<DefaultCollection> listCollections();
+    List<Collection> listCollections();
     
     /**
      * Gets a collection by name.
@@ -60,7 +59,7 @@ public interface CollectionManager
      * @param name the name of the collection
      * @return the collection with the given name
      */
-    DefaultCollection getCollection(String name);
+    Collection getCollection(String name);
     
     /**
      * Deletes a collection.

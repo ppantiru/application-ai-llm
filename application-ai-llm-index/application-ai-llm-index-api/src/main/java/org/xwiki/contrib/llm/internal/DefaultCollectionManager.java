@@ -82,7 +82,7 @@ public class DefaultCollectionManager implements CollectionManager
 
     
     @Override
-    public DefaultCollection createCollection(String name)
+    public Collection createCollection(String name)
     {
         if (this.collections.containsKey(name)) {
             // Handle existing collection case
@@ -131,20 +131,20 @@ public class DefaultCollectionManager implements CollectionManager
             EntityReference objectEntityReference = getObjectReference();
             BaseObject object = xwikiDoc.getXObject(objectEntityReference);
             String collectionName = object.getStringValue("name");
-            DefaultCollection newCollection = createCollection(collectionName);
+            Collection newCollection = createCollection(collectionName);
             newCollection.fromXWikiDocument(xwikiDoc);
         } catch (Exception e) {
             logger.warn("Failed to create collection {}", docRef.getName());
         }
     }
     @Override
-    public List<DefaultCollection> listCollections()
+    public List<Collection> listCollections()
     {
         return new ArrayList<>(collections.values());
     }
     
     @Override
-    public DefaultCollection getCollection(String name)
+    public Collection getCollection(String name)
     {
         return collections.get(name);
     }
