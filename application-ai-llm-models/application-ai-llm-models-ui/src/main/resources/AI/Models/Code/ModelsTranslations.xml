@@ -41,8 +41,8 @@ AI.Models.Code.ModelsClass_provider=Provider
 AI.Models.Code.ModelsClass_type=Type
 AI.Models.Code.ModelsClass_type_llm=Large language model
 AI.Models.Code.ModelsClass_type_emb=Embeddings model
-AI.Models.Code.ModelsClass_model=Model
-AI.Models.Code.ModelsClass_dimensions=Dimensions
+AI.Models.Code.ModelsClass_model=Model id
+AI.Models.Code.ModelsClass_dimensions=Number of Dimensions
 
 # Sheet keys
 models.sheet.description=This page controls how Models pages are displayed in both view and edit modes.
@@ -70,8 +70,8 @@ models.livetable.emptyvalue=-
 # Live table specific keys
 models.livetable.provider=Provider
 models.livetable.type=Type
-models.livetable.model=Model
-models.livetable.dimensions=Dimensions
+models.livetable.model=Model id
+models.livetable.dimensions=Number of Dimensions
 
 # Other keys
 models.entry.name=Models

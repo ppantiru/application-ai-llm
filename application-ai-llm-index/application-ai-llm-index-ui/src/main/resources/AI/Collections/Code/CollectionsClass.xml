@@ -68,6 +68,7 @@
       <displayType>select</displayType>
       <freeText/>
       <hint/>
+      <largeStorage>0</largeStorage>
       <multiSelect>0</multiSelect>
       <name>chunkingMethod</name>
       <number>3</number>
@@ -98,20 +99,34 @@
       <validationRegExp/>
       <classType>com.xpn.xwiki.objects.classes.NumberClass</classType>
     </chunkingOverlapOffset>
-    <documentSpace>
+    <documentSpaces>
+      <cache>0</cache>
+      <classname/>
       <customDisplay/>
+      <defaultValue/>
       <disabled>0</disabled>
+      <displayType>input</displayType>
+      <freeText/>
       <hint/>
-      <name>documentSpace</name>
-      <number>9</number>
-      <picker>0</picker>
-      <prettyName>Document space</prettyName>
-      <size>30</size>
+      <idField/>
+      <largeStorage>0</largeStorage>
+      <multiSelect>1</multiSelect>
+      <name>documentSpaces</name>
+      <number>6</number>
+      <picker>1</picker>
+      <prettyName>Document spaces</prettyName>
+      <relationalStorage>1</relationalStorage>
+      <separator> </separator>
+      <separators/>
+      <size>1</size>
+      <sort>none</sort>
+      <sql>select doc.space from XWikiDocument as doc, XWikiSpace as space where doc.space = space.reference</sql>
       <unmodifiable>0</unmodifiable>
       <validationMessage/>
       <validationRegExp/>
-      <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
-    </documentSpace>
+      <valueField/>
+      <classType>com.xpn.xwiki.objects.classes.DBListClass</classType>
+    </documentSpaces>
     <embeddingModel>
       <cache>0</cache>
       <classname>AI.Code.AIConfigClass</classname>
@@ -122,6 +137,7 @@
       <freeText/>
       <hint/>
       <idField>prop.value</idField>
+      <largeStorage>0</largeStorage>
       <multiSelect>0</multiSelect>
       <name>embeddingModel</name>
       <number>2</number>
@@ -145,6 +161,28 @@ AND prop.id.name = 'embeddingModels'</sql>
       <valueField>prop.name</valueField>
       <classType>com.xpn.xwiki.objects.classes.DBListClass</classType>
     </embeddingModel>
+    <groups>
+      <cache>0</cache>
+      <customDisplay/>
+      <disabled>0</disabled>
+      <displayType>select</displayType>
+      <hint/>
+      <multiSelect>1</multiSelect>
+      <name>groups</name>
+      <number>8</number>
+      <picker>0</picker>
+      <prettyName>Groups</prettyName>
+      <relationalStorage>0</relationalStorage>
+      <separator> </separator>
+      <separators/>
+      <size>6</size>
+      <sort>none</sort>
+      <unmodifiable>0</unmodifiable>
+      <usesList>1</usesList>
+      <validationMessage/>
+      <validationRegExp/>
+      <classType>com.xpn.xwiki.objects.classes.GroupsClass</classType>
+    </groups>
     <name>
       <customDisplay/>
       <disabled>0</disabled>
@@ -160,18 +198,28 @@ AND prop.id.name = 'embeddingModels'</sql>
       <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
     </name>
     <permissions>
+      <cache>0</cache>
       <customDisplay/>
+      <defaultValue/>
       <disabled>0</disabled>
+      <displayType>select</displayType>
+      <freeText/>
       <hint/>
+      <multiSelect>0</multiSelect>
       <name>permissions</name>
-      <number>6</number>
+      <number>7</number>
       <picker>0</picker>
-      <prettyName>Permissions</prettyName>
-      <size>30</size>
+      <prettyName>Permissions for groups</prettyName>
+      <relationalStorage>1</relationalStorage>
+      <separator> </separator>
+      <separators> ,|</separators>
+      <size>1</size>
+      <sort/>
       <unmodifiable>0</unmodifiable>
       <validationMessage/>
       <validationRegExp/>
-      <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+      <values>use=Use collection|manageContent=Manage collection content|manageSettings=Manage collection settings</values>
+      <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
     </permissions>
     <rightsCheckMethod>
       <cache>0</cache>
@@ -181,9 +229,10 @@ AND prop.id.name = 'embeddingModels'</sql>
       <displayType>select</displayType>
       <freeText/>
       <hint/>
+      <largeStorage>0</largeStorage>
       <multiSelect>0</multiSelect>
       <name>rightsCheckMethod</name>
-      <number>7</number>
+      <number>9</number>
       <picker>0</picker>
       <prettyName>Rights check method</prettyName>
       <relationalStorage>1</relationalStorage>
@@ -202,7 +251,7 @@ AND prop.id.name = 'embeddingModels'</sql>
       <disabled>0</disabled>
       <hint/>
       <name>rightsCheckMethodParam</name>
-      <number>8</number>
+      <number>10</number>
       <picker>0</picker>
       <prettyName>Rights check method parameter (URL)</prettyName>
       <size>30</size>

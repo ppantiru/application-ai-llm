@@ -53,7 +53,7 @@
       <name>dimensions</name>
       <number>4</number>
       <numberType>integer</numberType>
-      <prettyName>Dimensions</prettyName>
+      <prettyName>Number of Dimensions</prettyName>
       <size>30</size>
       <unmodifiable>0</unmodifiable>
       <validationMessage/>
@@ -67,7 +67,7 @@
       <name>model</name>
       <number>3</number>
       <picker>0</picker>
-      <prettyName>Model</prettyName>
+      <prettyName>Model id</prettyName>
       <size>30</size>
       <unmodifiable>0</unmodifiable>
       <validationMessage/>
