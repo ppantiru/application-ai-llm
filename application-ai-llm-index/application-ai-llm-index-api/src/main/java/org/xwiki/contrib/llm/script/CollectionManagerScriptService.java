@@ -96,6 +96,14 @@ public class CollectionManagerScriptService implements ScriptService
     }
 
     /**
+     * Clears the memory of the collection manager.
+     */
+    public void clearMemory()
+    {
+        collectionManager.clearMemory();
+    }
+
+    /**
      * Clears the solr core of all data.
      * 
      * @return boolean indicating success or failure

@@ -189,18 +189,17 @@ AND prop.id.name = 'embeddingModels'</sql>
         <classType>com.xpn.xwiki.objects.classes.GroupsClass</classType>
       </groups>
       <name>
-        <customDisplay/>
+        <customDisplay>{{include reference="AppWithinMinutes.Title"/}}</customDisplay>
         <disabled>0</disabled>
         <hint/>
         <name>name</name>
         <number>1</number>
-        <picker>0</picker>
         <prettyName>Name</prettyName>
-        <size>30</size>
+        <script/>
         <unmodifiable>0</unmodifiable>
         <validationMessage/>
         <validationRegExp/>
-        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+        <classType>com.xpn.xwiki.objects.classes.ComputedFieldClass</classType>
       </name>
       <permissions>
         <cache>0</cache>

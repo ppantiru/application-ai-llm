@@ -27,18 +27,14 @@ import java.util.Map;
 import org.xwiki.contrib.llm.Collection;
 import org.xwiki.contrib.llm.CollectionManager;
 import org.xwiki.contrib.llm.SolrConnector;
-import org.xwiki.model.EntityType;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.model.reference.DocumentReferenceResolver;
-import org.xwiki.model.reference.EntityReference;
-import org.xwiki.model.reference.SpaceReference;
 import org.xwiki.model.reference.SpaceReferenceResolver;
 import org.xwiki.query.Query;
 import org.xwiki.query.QueryManager;
 
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.doc.XWikiDocument;
-import com.xpn.xwiki.objects.BaseObject;
 
 import org.xwiki.component.annotation.Component;
 
@@ -128,9 +124,7 @@ public class DefaultCollectionManager implements CollectionManager
     {
         try {
             XWikiDocument xwikiDoc = context.getWiki().getDocument(docRef, context);
-            EntityReference objectEntityReference = getObjectReference();
-            BaseObject object = xwikiDoc.getXObject(objectEntityReference);
-            String collectionName = object.getStringValue("name");
+            String collectionName = xwikiDoc.getTitle();
             Collection newCollection = createCollection(collectionName);
             newCollection.fromXWikiDocument(xwikiDoc);
         } catch (Exception e) {
@@ -171,21 +165,7 @@ public class DefaultCollectionManager implements CollectionManager
         } 
     }
 
-    //get XObject reference for the collection XClass
-    private EntityReference getObjectReference()
-    {
-        SpaceReference spaceRef = explicitStringSpaceRefResolver.resolve(Collection.XCLASS_SPACE_STRING);
-
-        EntityReference collectionClassRef = new EntityReference(Collection.XCLASS_NAME,
-                                    EntityType.DOCUMENT,
-                                    spaceRef
-                                );
-        return new EntityReference(Collection.XCLASS_NAME, EntityType.OBJECT, collectionClassRef);
-    }
-
-    /**
-     * Clears the in-memory cache of collections.
-     */
+    @Override
     public void clearMemory()
     {
         collections.clear();

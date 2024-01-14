@@ -76,7 +76,7 @@ public interface CollectionManager
     boolean clearIndexCore();
 
     /**
-     * Clears the memory of the collection manager.
+     * Clears the in-memory cache of collections.
      */
     void clearMemory();
 }

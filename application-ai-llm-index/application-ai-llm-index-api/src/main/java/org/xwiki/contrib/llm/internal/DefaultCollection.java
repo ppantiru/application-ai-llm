@@ -54,7 +54,6 @@ import com.xpn.xwiki.objects.BaseObject;
 @InstantiationStrategy(ComponentInstantiationStrategy.PER_LOOKUP)
 public class DefaultCollection implements Collection
 {
-    private static final String NAME_FIELDNAME = "name";
     private static final String EMBEDDINGMODEL_FIELDNAME = "embeddingModel";
     private static final String CHUNKING_METHOD_FIELDNAME = "chunkingMethod";
     private static final String CHUNKING_MAX_SIZE_FIELDNAME = "chunkingMaxSize";
@@ -251,7 +250,7 @@ public class DefaultCollection implements Collection
     // Pull collection properties from the XObject
     private void pullXObjectValues(BaseObject object)
     {
-        this.name = object.getStringValue(NAME_FIELDNAME);
+        this.name = this.xwikidocument.getTitle();
         this.embeddingModel = object.getStringValue(EMBEDDINGMODEL_FIELDNAME);
         this.chunkingMethod = object.getStringValue(CHUNKING_METHOD_FIELDNAME);
         this.chunkingMaxSize = object.getIntValue(CHUNKING_MAX_SIZE_FIELDNAME);
@@ -311,7 +310,7 @@ public class DefaultCollection implements Collection
     //update the XObject with the collection properties
     private BaseObject setXObjectValues(BaseObject object)
     {
-        object.setStringValue(NAME_FIELDNAME, this.name);
+        this.xwikidocument.setTitle(this.name);
         object.setStringValue(EMBEDDINGMODEL_FIELDNAME, this.embeddingModel);
         object.setStringValue(CHUNKING_METHOD_FIELDNAME, this.chunkingMethod);
         object.setIntValue(CHUNKING_MAX_SIZE_FIELDNAME, this.chunkingMaxSize);

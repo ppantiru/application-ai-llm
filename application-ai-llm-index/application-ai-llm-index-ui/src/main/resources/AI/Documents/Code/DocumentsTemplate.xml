@@ -74,7 +74,7 @@
         <displayType>input</displayType>
         <freeText/>
         <hint/>
-        <idField>name</idField>
+        <idField>doc.title</idField>
         <multiSelect>0</multiSelect>
         <name>collection</name>
         <number>3</number>
@@ -89,7 +89,7 @@
         <unmodifiable>0</unmodifiable>
         <validationMessage/>
         <validationRegExp/>
-        <valueField>name</valueField>
+        <valueField>doc.title</valueField>
         <classType>com.xpn.xwiki.objects.classes.DBListClass</classType>
       </collection>
       <content>
