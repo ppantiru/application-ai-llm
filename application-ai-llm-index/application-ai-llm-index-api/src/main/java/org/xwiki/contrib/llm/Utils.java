@@ -27,6 +27,7 @@ import javax.inject.Named;
 import javax.inject.Provider;
 import javax.inject.Singleton;
 
+import org.slf4j.Logger;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.model.reference.SpaceReferenceResolver;
 
@@ -49,31 +50,41 @@ public class Utils
 
     @Inject
     private CollectionManager collectionManager;
-
+ 
+    @Inject
+    private Logger logger;
     /**
      * This method is responsible for splitting the document into chunks.
      * 
      * @param document
      * @return a Map of chunks
      */
-    public Map<Integer, Chunk> chunkDocument(Document document)
+    public Map<Integer, Chunk> chunkDocument(Document document) 
     {
         Map<Integer, Chunk> chunkMap;
-        Collection collection = collectionManager.getCollection(document.getCollection());
-        if (collection.getChunkingMethod().equals("sectionChunking")) {
-            chunkMap = chunkDocumentBasedOnSections();
-        } else {
-            chunkMap = chunkDocumentBasedOnCharacters(document, collection.getChunkingMaxSize(),
-                        collection.getChunkingOverlapOffset());
+        Collection collection;
+        try {
+            collection = collectionManager.getCollection(document.getCollection());
+            logger.info("Chosen collection: " + collection.getName());
+            if (collection.getChunkingMethod().equals("sectionChunking")) {
+                logger.info("Chunking method not supported");
+                chunkMap = chunkDocumentBasedOnSections();
+            } else {
+                logger.info("Chose the correct chunking method");
+                chunkMap = chunkDocumentBasedOnCharacters(document, collection.getChunkingMaxSize(),
+                            collection.getChunkingOverlapOffset());
+            }
+            return chunkMap;
+        } catch (IndexException e) {
+            e.printStackTrace();
         }
-
-        return chunkMap;
+        return new HashMap<>();
     }
 
     private Map<Integer, Chunk> chunkDocumentBasedOnSections()
     {
         // TODO Auto-generated method stub
-        return null;
+        return new HashMap<>();
     }
 
     private Map<Integer, Chunk> chunkDocumentBasedOnCharacters(Document document, int maxChunkSize, int offset)

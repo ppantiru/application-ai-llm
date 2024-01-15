@@ -19,30 +19,30 @@
  */
 package org.xwiki.contrib.llm.internal;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.xwiki.contrib.llm.Collection;
 import org.xwiki.contrib.llm.CollectionManager;
+import org.xwiki.contrib.llm.IndexException;
 import org.xwiki.contrib.llm.SolrConnector;
-import org.xwiki.model.reference.DocumentReference;
-import org.xwiki.model.reference.DocumentReferenceResolver;
+import org.xwiki.model.EntityType;
 import org.xwiki.model.reference.SpaceReferenceResolver;
 import org.xwiki.query.Query;
+import org.xwiki.query.QueryException;
 import org.xwiki.query.QueryManager;
 
 import com.xpn.xwiki.XWikiContext;
+import com.xpn.xwiki.XWikiException;
 import com.xpn.xwiki.doc.XWikiDocument;
 
 import org.xwiki.component.annotation.Component;
 
 import javax.inject.Inject;
 import javax.inject.Named;
-import javax.inject.Provider;
+
 
 import javax.inject.Singleton;
+import javax.inject.Provider;
 
 import org.slf4j.Logger;
 
@@ -57,7 +57,10 @@ public class DefaultCollectionManager implements CollectionManager
 {
     @Inject
     private Logger logger;
-    
+
+    @Inject
+    private QueryManager queryManager;
+
     @Inject
     private Provider<DefaultCollection> collectionProvider;
 
@@ -65,92 +68,49 @@ public class DefaultCollectionManager implements CollectionManager
     private Provider<XWikiContext> contextProvider;
 
     @Inject
-    private DocumentReferenceResolver<String> documentReferenceResolver;
-
-    @Inject
-    private QueryManager queryManager;
-
-    @Inject
     @Named("current")
     private SpaceReferenceResolver<String> explicitStringSpaceRefResolver;
-
-    private Map<String, DefaultCollection> collections = new HashMap<>();
-
-    
+   
     @Override
-    public Collection createCollection(String name)
+    public List<String> getCollections()
     {
-        if (this.collections.containsKey(name)) {
-            // Handle existing collection case
-            this.logger.warn("Collection with name {} already exists", name);
-            return null;
-        } else {
-            DefaultCollection newCollection = collectionProvider.get();
-            newCollection.initialize(name);
-            this.collections.put(name, newCollection);
-            return newCollection;
-        }
-
-    }
-
-    @Override
-    public boolean pullCollections()
-    {
-        String templateDoc = Collection.XCLASS_SPACE_STRING + ".CollectionsTemplate";
+        List<String> collections = null;
         String collectionClass = Collection.XCLASS_SPACE_STRING + "." + Collection.XCLASS_NAME;
-        logger.info("Pulling collections from XWiki...");
+        String templateDoc = Collection.XCLASS_SPACE_STRING + ".CollectionsTemplate";
         String hql = "select doc.fullName from XWikiDocument doc, BaseObject obj "
-                   + "where doc.fullName=obj.name and obj.className='" + collectionClass + "' "
-                   + "and doc.fullName <> '" + templateDoc + "'";
-
+                    + "where doc.fullName=obj.name and obj.className='" + collectionClass + "' "
+                    + "and doc.fullName <> '" + templateDoc + "'";
         try {
             Query query = queryManager.createQuery(hql, Query.HQL);
-            List<String> docNames = query.execute();
-
-            for (String docName : docNames) {
-                XWikiContext context = contextProvider.get();
-                DocumentReference docRef = documentReferenceResolver.resolve(docName);
-                processXWikiDocument(docRef, context);
-            }
-
-            return true;
-        } catch (Exception e) {
+            collections = query.execute();
+            return collections;
+        } catch (QueryException e) {
             e.printStackTrace();
         }
-        return false;
-    }
-    
-    private void processXWikiDocument(DocumentReference docRef, XWikiContext context)
-    {
-        try {
-            XWikiDocument xwikiDoc = context.getWiki().getDocument(docRef, context);
-            String collectionName = xwikiDoc.getTitle();
-            Collection newCollection = createCollection(collectionName);
-            newCollection.fromXWikiDocument(xwikiDoc);
-        } catch (Exception e) {
-            logger.warn("Failed to create collection {}", docRef.getName());
-        }
-    }
-    @Override
-    public List<Collection> listCollections()
-    {
-        return new ArrayList<>(collections.values());
+        return collections;
     }
     
     @Override
-    public Collection getCollection(String name)
+    public Collection getCollection(String fullName) throws IndexException
     {
-        return collections.get(name);
-    }
-
-    @Override
-    public boolean deleteCollection(String name)
-    {
-        if (collections.containsKey(name)) {
-            collections.remove(name);
-            return true;
+        if (getCollections().contains(fullName)) {
+            XWikiContext context = contextProvider.get();
+            
+            try {
+                XWikiDocument xwikiDoc = context.getWiki().getDocument(fullName, EntityType.DOCUMENT, context);
+                if (!xwikiDoc.isNew()) {
+                    DefaultCollection collection = this.collectionProvider.get();
+                    collection.initialize(xwikiDoc);
+                    return collection;
+                } else {
+                    return null;
+                }
+            } catch (XWikiException e) {
+                throw new IndexException("Failed to get collection " + fullName, e);
+            }
+        } else {
+            return null;
         }
-        return false;
     }
 
     @Override
@@ -163,12 +123,6 @@ public class DefaultCollectionManager implements CollectionManager
             logger.error("Failed to clear index core", e);
             return false;
         } 
-    }
-
-    @Override
-    public void clearMemory()
-    {
-        collections.clear();
     }
 
 }

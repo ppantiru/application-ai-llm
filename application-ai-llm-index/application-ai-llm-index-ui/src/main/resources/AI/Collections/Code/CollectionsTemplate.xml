@@ -51,6 +51,28 @@
       <defaultWeb/>
       <nameField/>
       <validationScript/>
+      <adminGroups>
+        <cache>0</cache>
+        <customDisplay/>
+        <disabled>0</disabled>
+        <displayType>select</displayType>
+        <hint/>
+        <multiSelect>1</multiSelect>
+        <name>adminGroups</name>
+        <number>9</number>
+        <picker>0</picker>
+        <prettyName>Groups that can Manage Settings</prettyName>
+        <relationalStorage>0</relationalStorage>
+        <separator> </separator>
+        <separators/>
+        <size>6</size>
+        <sort>none</sort>
+        <unmodifiable>0</unmodifiable>
+        <usesList>1</usesList>
+        <validationMessage/>
+        <validationRegExp/>
+        <classType>com.xpn.xwiki.objects.classes.GroupsClass</classType>
+      </adminGroups>
       <chunkingMaxSize>
         <customDisplay/>
         <disabled>0</disabled>
@@ -132,6 +154,28 @@
         <valueField/>
         <classType>com.xpn.xwiki.objects.classes.DBListClass</classType>
       </documentSpaces>
+      <editGroups>
+        <cache>0</cache>
+        <customDisplay/>
+        <disabled>0</disabled>
+        <displayType>select</displayType>
+        <hint/>
+        <multiSelect>1</multiSelect>
+        <name>editGroups</name>
+        <number>8</number>
+        <picker>0</picker>
+        <prettyName>Groups that can manage content</prettyName>
+        <relationalStorage>0</relationalStorage>
+        <separator> </separator>
+        <separators/>
+        <size>6</size>
+        <sort>none</sort>
+        <unmodifiable>0</unmodifiable>
+        <usesList>1</usesList>
+        <validationMessage/>
+        <validationRegExp/>
+        <classType>com.xpn.xwiki.objects.classes.GroupsClass</classType>
+      </editGroups>
       <embeddingModel>
         <cache>0</cache>
         <classname>AI.Code.AIConfigClass</classname>
@@ -166,28 +210,6 @@ AND prop.id.name = 'embeddingModels'</sql>
         <valueField>prop.name</valueField>
         <classType>com.xpn.xwiki.objects.classes.DBListClass</classType>
       </embeddingModel>
-      <groups>
-        <cache>0</cache>
-        <customDisplay/>
-        <disabled>0</disabled>
-        <displayType>select</displayType>
-        <hint/>
-        <multiSelect>1</multiSelect>
-        <name>groups</name>
-        <number>8</number>
-        <picker>0</picker>
-        <prettyName>Groups</prettyName>
-        <relationalStorage>0</relationalStorage>
-        <separator> </separator>
-        <separators/>
-        <size>6</size>
-        <sort>none</sort>
-        <unmodifiable>0</unmodifiable>
-        <usesList>1</usesList>
-        <validationMessage/>
-        <validationRegExp/>
-        <classType>com.xpn.xwiki.objects.classes.GroupsClass</classType>
-      </groups>
       <name>
         <customDisplay>{{include reference="AppWithinMinutes.Title"/}}</customDisplay>
         <disabled>0</disabled>
@@ -201,30 +223,28 @@ AND prop.id.name = 'embeddingModels'</sql>
         <validationRegExp/>
         <classType>com.xpn.xwiki.objects.classes.ComputedFieldClass</classType>
       </name>
-      <permissions>
+      <queryGroups>
         <cache>0</cache>
         <customDisplay/>
-        <defaultValue/>
         <disabled>0</disabled>
         <displayType>select</displayType>
-        <freeText/>
         <hint/>
-        <multiSelect>0</multiSelect>
-        <name>permissions</name>
+        <multiSelect>1</multiSelect>
+        <name>queryGroups</name>
         <number>7</number>
         <picker>0</picker>
-        <prettyName>Permissions for groups</prettyName>
-        <relationalStorage>1</relationalStorage>
+        <prettyName>groups that can query</prettyName>
+        <relationalStorage>0</relationalStorage>
         <separator> </separator>
-        <separators> ,|</separators>
-        <size>1</size>
-        <sort/>
+        <separators/>
+        <size>6</size>
+        <sort>none</sort>
         <unmodifiable>0</unmodifiable>
+        <usesList>1</usesList>
         <validationMessage/>
         <validationRegExp/>
-        <values>use=Use collection|manageContent=Manage collection content|manageSettings=Manage collection settings</values>
-        <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
-      </permissions>
+        <classType>com.xpn.xwiki.objects.classes.GroupsClass</classType>
+      </queryGroups>
       <rightsCheckMethod>
         <cache>0</cache>
         <customDisplay/>
@@ -236,7 +256,7 @@ AND prop.id.name = 'embeddingModels'</sql>
         <largeStorage>0</largeStorage>
         <multiSelect>0</multiSelect>
         <name>rightsCheckMethod</name>
-        <number>9</number>
+        <number>10</number>
         <picker>0</picker>
         <prettyName>Rights check method</prettyName>
         <relationalStorage>1</relationalStorage>
@@ -255,7 +275,7 @@ AND prop.id.name = 'embeddingModels'</sql>
         <disabled>0</disabled>
         <hint/>
         <name>rightsCheckMethodParam</name>
-        <number>10</number>
+        <number>11</number>
         <picker>0</picker>
         <prettyName>Rights check method parameter (URL)</prettyName>
         <size>30</size>
@@ -266,6 +286,9 @@ AND prop.id.name = 'embeddingModels'</sql>
       </rightsCheckMethodParam>
     </class>
     <property>
+      <adminGroups/>
+    </property>
+    <property>
       <chunkingMaxSize>1000</chunkingMaxSize>
     </property>
     <property>
@@ -275,31 +298,25 @@ AND prop.id.name = 'embeddingModels'</sql>
       <chunkingOverlapOffset>0</chunkingOverlapOffset>
     </property>
     <property>
-      <documentSpace>Documents</documentSpace>
+      <documentSpaces/>
     </property>
     <property>
-      <documentSpaces/>
+      <editGroups/>
     </property>
     <property>
       <embeddingModel/>
     </property>
     <property>
-      <groups/>
-    </property>
-    <property>
-      <name/>
-    </property>
-    <property>
       <permissions/>
+    </property>
+    <property>
+      <queryGroups/>
     </property>
     <property>
       <rightsCheckMethod>rightsCheckJWT</rightsCheckMethod>
     </property>
     <property>
       <rightsCheckMethodParam/>
-    </property>
-    <property>
-      <test/>
     </property>
   </object>
 </xwikidoc>

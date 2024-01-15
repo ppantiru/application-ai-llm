@@ -86,7 +86,7 @@ public class IndexWorker implements EventListener
         this.logger.info("Event: {}", event);
         XWikiDocument xdocument = (XWikiDocument) source;
         BaseObject documentObject = xdocument.getXObject(documentClassReference);
-        this.logger.info("Document: {}", xdocument.getDocumentReference());
+        this.logger.info("Document ref on event: {}", xdocument.getDocumentReference());
         if (documentObject != null) {
             try {
                 //Add document to the queue
@@ -98,9 +98,7 @@ public class IndexWorker implements EventListener
                 //if the queue is not empty and the worker is not processing, process the queue
                 if (!keyValueQueue.isEmpty() && !isProcessing) {
                     isProcessing = true;
-                    collectionManager.pullCollections();
                     processDocumentQueue(xdocument);
-                    collectionManager.clearMemory();
                     isProcessing = false;
                 }
             } catch (Exception e) {
@@ -112,20 +110,22 @@ public class IndexWorker implements EventListener
 
     private void processDocumentQueue(XWikiDocument xdocument)
     {
-        logger.info("document {}", xdocument.getDocumentReference());
+        logger.info("document ref {}", xdocument.getDocumentReference());
         //while queue is not empty, get first document, log it's ID and remove it from the queue
         while (!this.keyValueQueue.isEmpty()) {
-            logger.info("collectionManager pull {}", collectionManager.listCollections());
+            logger.info("collectionManager pull {}", collectionManager.getCollections());
             logger.info("for document {}", xdocument.getDocumentReference());
             AbstractMap.SimpleEntry<String, String> nextInLine = this.keyValueQueue.poll();
+            logger.info("nextInLine {}", nextInLine);
             if (nextInLine != null) {
                 String key = nextInLine.getKey();
                 String value = nextInLine.getValue();
                 this.logger.info("Processing document: {}", key);
                 try {
-                    Document memDocument = collectionManager.getCollection(value).createDocument(key);
-                    memDocument = memDocument.toDocument(xdocument);
-                    List<Chunk> chunks = memDocument.chunkDocument();
+                    Document document = collectionManager.getCollection(value).getDocument(key);
+                    logger.info("Document: {}", document);
+                    List<Chunk> chunks = document.chunkDocument();
+                    logger.info("Chunks: {}", chunks);
                     for (Chunk chunk : chunks) {
                         logger.info("Chunks: docID {}, chunk index {}", chunk.getDocumentID(), chunk.getChunkIndex());
                         chunk.computeEmbeddings();

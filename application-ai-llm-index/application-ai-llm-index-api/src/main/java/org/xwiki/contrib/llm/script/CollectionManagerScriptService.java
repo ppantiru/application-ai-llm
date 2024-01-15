@@ -28,6 +28,7 @@ import javax.inject.Singleton;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.contrib.llm.Collection;
 import org.xwiki.contrib.llm.CollectionManager;
+import org.xwiki.contrib.llm.IndexException;
 import org.xwiki.script.service.ScriptService;
 
 /**
@@ -43,35 +44,25 @@ public class CollectionManagerScriptService implements ScriptService
     @Inject
     private CollectionManager collectionManager;
 
-    /**
-     * Creates a new collection.
-     *
-     * @param name the name of the collection
-     * @return the created collection
-     */
-    public Collection createCollection(String name)
-    {
-        return collectionManager.createCollection(name);
-    }
+    // /**
+    //  * Creates a new collection.
+    //  *
+    //  * @param name the name of the collection
+    //  * @return the created collection
+    //  */
+    // public Collection createCollection(String name)
+    // {
+    //     return collectionManager.createCollection(name);
+    // }
     
     /**
      * Lists all collections.
      *
      * @return a list of all collections
      */
-    public List<Collection> listCollections()
+    public List<String> listCollections()
     {
-        return collectionManager.listCollections();
-    }
-
-    /**
-     * Pulls all collections from XWiki.
-     *
-     * @return boolean indicating success or failure
-     */
-    public boolean pullCollections()
-    {
-        return collectionManager.pullCollections();
+        return collectionManager.getCollections();
     }
 
     /**
@@ -80,28 +71,20 @@ public class CollectionManagerScriptService implements ScriptService
      * @param name the name of the collection
      * @return the collection with the given name
      */
-    public Collection getCollection(String name)
+    public Collection getCollection(String name) throws IndexException
     {
         return collectionManager.getCollection(name);
     }
 
-    /**
-     * Deletes a collection.
-     * @param name
-     * @return boolean indicating success or failure
-     */
-    public boolean deleteCollection(String name)
-    {
-        return collectionManager.deleteCollection(name);
-    }
-
-    /**
-     * Clears the memory of the collection manager.
-     */
-    public void clearMemory()
-    {
-        collectionManager.clearMemory();
-    }
+    // /**
+    //  * Deletes a collection.
+    //  * @param name
+    //  * @return boolean indicating success or failure
+    //  */
+    // public boolean deleteCollection(String name)
+    // {
+    //     return collectionManager.deleteCollection(name);
+    // }
 
     /**
      * Clears the solr core of all data.
