@@ -1,11 +1,14 @@
-# LLM AI Application
+# XWiki AI
 
-The LLM project aims to integrate artificial intelligence in the form of Large Language Models (LLMs)
-into the XWiki platform.
+This is a fork of the main work done on https://github.com/xwiki-contrib/ai-llm
+I use it to test experimental ideas.
+For the stable version go to the main [xwiki-contrib/aillm repo](https://github.com/xwiki-contrib/ai-llm)
+
+This project aims to integrate artificial intelligence currently in the form of Large Language Models (LLMs)
+into the XWiki platform as an installable extension.
 You can find more details about the general plan in the
 [design documentation](https://design.xwiki.org/xwiki/bin/view/Proposal/X-AI/).
 
-* Project Lead: Ludovic Dubost 
 * [Documentation & Download](https://extensions.xwiki.org/xwiki/bin/view/Extension/LLM/) 
 * [Issue Tracker](https://jira.xwiki.org/browse/LLMAI)
 * Communication: [Forum](https://forum.xwiki.org/), [Chat](https://dev.xwiki.org/xwiki/bin/view/Community/Chat)
@@ -13,6 +16,3 @@ You can find more details about the general plan in the
 
 * Minimal XWiki version supported: XWiki 16.2.0
 * License: LGPL 2.1+
-* Translations: N/A 
-* Sonar Dashboard: N/A 
-* Continuous Integration Status: [![Build Status](https://ci.xwiki.org/job/XWiki%20Contrib/job/ai-llm/job/main/badge/icon)](https://ci.xwiki.org/job/XWiki%20Contrib/job/ai-llm/job/main/)
