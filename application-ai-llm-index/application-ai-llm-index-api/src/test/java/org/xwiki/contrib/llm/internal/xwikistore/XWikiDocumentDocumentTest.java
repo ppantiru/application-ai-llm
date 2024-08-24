@@ -21,6 +21,7 @@ package org.xwiki.contrib.llm.internal.xwikistore;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -35,10 +36,12 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.xwiki.contrib.llm.IndexException;
+import org.xwiki.localization.ContextualLocalizationManager;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.rendering.syntax.Syntax;
 import org.xwiki.test.junit5.mockito.ComponentTest;
 import org.xwiki.test.junit5.mockito.InjectMockComponents;
+import org.xwiki.test.junit5.mockito.MockComponent;
 
 import com.xpn.xwiki.XWikiException;
 import com.xpn.xwiki.doc.XWikiAttachment;
@@ -72,6 +75,9 @@ class XWikiDocumentDocumentTest
     @InjectMockComponents
     private XWikiDocumentDocument xWikiDocumentDocument;
 
+    @MockComponent
+    private ContextualLocalizationManager localizationManager;
+
     @Mock
     private XWikiDocument xWikiDocument;
 
@@ -81,6 +87,11 @@ class XWikiDocumentDocumentTest
         this.xWikiDocumentDocument.initialize(COLLECTION, this.xWikiDocument);
         when(this.xWikiDocument.getDocumentReferenceWithLocale()).thenReturn(DOCUMENT_REFERENCE);
         when(this.xWikiDocument.getDocumentReference()).thenReturn(DOCUMENT_REFERENCE.withoutLocale());
+        when(this.localizationManager.getTranslationPlain(eq("aiLLM.index.objectHeading"), any()))
+            .then(invocation -> {
+                String parameter = invocation.getArgument(1);
+                return "Metadata of Type %s".formatted(parameter);
+            });
     }
 
     @Test
@@ -184,8 +195,9 @@ class XWikiDocumentDocumentTest
         when(baseClass.getFieldList()).thenReturn(properties);
 
         BaseObject xObject = mock();
+        when(xObject.getDocumentReference()).thenReturn(new DocumentReference("mywiki", "AI", "Doc"));
+        when(xObject.getXClassReference()).thenReturn(new DocumentReference("mywiki", "AI", "XClass"));
         when(xObject.getXClass(any())).thenReturn(baseClass);
-        when(xObject.getPrettyName()).thenReturn("XObject Pretty Name");
 
         for (String propertyName : List.of("property1", "property2")) {
             PropertyClass propertyClass = mock();
@@ -195,14 +207,14 @@ class XWikiDocumentDocumentTest
             when(xObject.safeget(propertyName)).thenReturn(mock());
             properties.add(propertyClass);
         }
-        when(this.xWikiDocument.getXObjects()).thenReturn(Map.of(mock(), List.of(xObject)));
+        when(this.xWikiDocument.getXObjects()).thenReturn(Map.of(mock(), Arrays.asList(null, xObject)));
 
         assertEquals("""
             = XObjects Title =
             
             XObjects content
             
-            = XObject Pretty Name =
+            = Metadata of Type AI.XClass =
             
             == Property property1 ==
             

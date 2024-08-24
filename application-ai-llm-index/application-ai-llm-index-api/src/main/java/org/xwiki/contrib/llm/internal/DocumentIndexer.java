@@ -39,6 +39,7 @@ import org.xwiki.contrib.llm.ChunkingUtils;
 import org.xwiki.contrib.llm.Collection;
 import org.xwiki.contrib.llm.CollectionManager;
 import org.xwiki.contrib.llm.Document;
+import org.xwiki.contrib.llm.EmbeddingModel;
 import org.xwiki.contrib.llm.EmbeddingsUtils;
 import org.xwiki.contrib.llm.IndexException;
 import org.xwiki.contrib.llm.SolrConnector;
@@ -92,6 +93,12 @@ public class DocumentIndexer
         try {
             Collection collectionObj = this.collectionManager.getCollection(collection);
             Document documentObj = collectionObj.getDocumentStore().getDocument(document);
+
+            if (documentObj == null) {
+                throw new IndexException("Document [%s] does not exist in collection [%s] in wiki [%s]"
+                    .formatted(document, collection, wiki));
+            }
+
             List<Chunk> chunks = this.chunkingUtils.chunkDocument(collectionObj, documentObj);
             String embeddingModel = collectionObj.getEmbeddingModel();
             UserReference author = collectionObj.getAuthor();
@@ -155,7 +162,10 @@ public class DocumentIndexer
         if (!chunksToEmbed.isEmpty()) {
             try {
                 List<String> texts = chunksToEmbed.stream().map(Chunk::getContent).toList();
-                List<double[]> embeddings = this.embeddingsUtils.computeEmbeddings(texts, embeddingModel, author);
+                List<double[]> embeddings = this.embeddingsUtils.computeEmbeddings(texts,
+                                                                                embeddingModel,
+                                                                                author,
+                                                                                EmbeddingModel.EmbeddingPurpose.INDEX);
                 for (int j = 0; j < chunksToEmbed.size(); j++) {
                     chunksToEmbed.get(j).setEmbeddings(embeddings.get(j));
                 }

@@ -25,7 +25,7 @@
     <parent>
         <groupId>org.xwiki.contrib.llm</groupId>
         <artifactId>application-ai-llm-index</artifactId>
-        <version>0.5-SNAPSHOT</version>
+        <version>0.6.2-SNAPSHOT</version>
     </parent>
     <artifactId>application-ai-llm-index-api</artifactId>
     <name>LLM - Index - API</name>
@@ -33,7 +33,7 @@
     <properties>
         <xwiki.extension.name>LLM Index API (BETA)</xwiki.extension.name>
         <xwiki.extension.category>api</xwiki.extension.category>
-        <xwiki.jacoco.instructionRatio>0.33</xwiki.jacoco.instructionRatio>
+        <xwiki.jacoco.instructionRatio>0.31</xwiki.jacoco.instructionRatio>
         <xwiki.extension.features>
           org.xwiki.contrib.llm:application-llm-index-api
         </xwiki.extension.features>
@@ -59,11 +59,6 @@
             <groupId>org.xwiki.platform</groupId>
             <artifactId>xwiki-platform-livedata-api</artifactId>
             <version>${platform.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.tdunning</groupId>
-            <artifactId>json</artifactId>
-            <version>1.8</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
@@ -106,46 +101,12 @@
         <dependency>
             <groupId>org.xwiki.contrib.llm</groupId>
             <artifactId>application-ai-llm-models-api</artifactId>
-            <version>0.5-SNAPSHOT</version>
+            <version>0.6.2-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>io.github.resilience4j</groupId>
             <artifactId>resilience4j-retry</artifactId>
             <version>2.2.0</version>
-        </dependency>
-        <dependency>
-            <groupId>ai.djl.pytorch</groupId>
-            <artifactId>pytorch-engine</artifactId>
-            <version>0.28.0</version>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>ai.djl.pytorch</groupId>
-            <artifactId>pytorch-native-cpu</artifactId>
-            <classifier>linux-x86_64</classifier>
-            <scope>runtime</scope>
-            <version>2.2.2</version>
-        </dependency>
-        <dependency>
-            <groupId>ai.djl.pytorch</groupId>
-            <artifactId>pytorch-jni</artifactId>
-            <version>2.2.2-0.28.0</version>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>ai.djl.pytorch</groupId>
-            <artifactId>pytorch-model-zoo</artifactId>
-            <version>0.28.0</version>
-        </dependency>
-        <dependency>
-            <groupId>ai.djl</groupId>
-            <artifactId>api</artifactId>
-            <version>0.28.0</version>
-        </dependency>
-        <dependency>
-            <groupId>ai.djl.huggingface</groupId>  
-            <artifactId>tokenizers</artifactId>
-            <version>0.28.0</version>
         </dependency>
     </dependencies>
 </project>

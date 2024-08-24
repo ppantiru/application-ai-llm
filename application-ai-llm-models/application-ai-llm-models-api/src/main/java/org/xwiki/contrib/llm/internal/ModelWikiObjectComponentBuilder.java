@@ -60,10 +60,15 @@ import com.xpn.xwiki.objects.BaseObject;
  * @since 0.3
  */
 @Component
-@Named("AI.Models.Code.ModelsClass")
+@Named(ModelWikiObjectComponentBuilder.NAME)
 @Singleton
 public class ModelWikiObjectComponentBuilder implements WikiObjectComponentBuilder
 {
+    /**
+     * The name of the component builder.
+     */
+    public static final String NAME = "AI.Models.Code.ModelsClass";
+
     private static final List<String> SPACE_NAMES = List.of("AI", "Models", "Code");
 
     // Local reference to the class AI.Models.Code.ModelsClass that should trigger the builder.
@@ -119,6 +124,16 @@ public class ModelWikiObjectComponentBuilder implements WikiObjectComponentBuild
     private static final String MODEL_FIELD = "model";
 
     /**
+     * The name of the field containing the indexing prefix for the embedding model.
+     */
+    private static final String EMBEDDING_INDEX_PREFIX = "embeddingIndexPrefix";
+
+    /**
+     * The name of the field containing the query prefix for the embedding model.
+     */
+    private static final String EMBEDDING_QUERY_PREFIX = "embeddingQueryPrefix";
+
+    /**
      * The name of the field containing the server name that should be called.
      */
     private static final String SERVER_NAME_FIELD = "serverName";
@@ -131,7 +146,8 @@ public class ModelWikiObjectComponentBuilder implements WikiObjectComponentBuild
     private AuthorizationManager authorizationManager;
 
     @Inject
-    private ComponentManager componentManager;
+    @Named("context")
+    private Provider<ComponentManager> componentManagerProvider;
 
     @Inject
     @Named("local")
@@ -159,24 +175,27 @@ public class ModelWikiObjectComponentBuilder implements WikiObjectComponentBuild
         try {
             XWikiDocument document = context.getWiki().getDocument(documentReference, context);
             // Check wiki admin rights.
-            if (!this.authorizationManager.hasAccess(Right.ADMIN, document.getAuthorReference(),
+            DocumentReference authorReference = document.getAuthorReference();
+            if (!this.authorizationManager.hasAccess(Right.ADMIN, authorReference,
                 documentReference.getWikiReference())) {
                 throw new WikiComponentException(String.format(
                     "Failed to build component for object [%s], user [%s] does not have admin rights on the wiki.",
-                    reference, documentReference));
+                    reference, authorReference));
             }
 
             BaseObject xObject = document.getXObject(reference);
 
             ModelConfiguration modelConfiguration = buildModelConfiguration(xObject);
 
+            ComponentManager componentManager = this.componentManagerProvider.get();
+
             String modelType = xObject.getStringValue(TYPE_FIELD);
             if (TYPE_LLM.equals(modelType)) {
                 List<ChatRequestFilter> filters = getChatRequestFilters(document);
 
-                return List.of(new FilteringOpenAIChatModel(modelConfiguration, filters, this.componentManager));
+                return List.of(new FilteringOpenAIChatModel(modelConfiguration, filters, componentManager));
             } else if (TYPE_EMBEDDING.equals(modelType)) {
-                return List.of(new OpenAIEmbeddingModel(modelConfiguration, this.componentManager));
+                return List.of(new DefaultEmbeddingModel(modelConfiguration, componentManager));
             } else {
                 throw new WikiComponentException(String.format("Unknown model type [%s]", modelType));
             }
@@ -191,7 +210,7 @@ public class ModelWikiObjectComponentBuilder implements WikiObjectComponentBuild
     {
         // Get all filter builders and build the respective filter components.
         List<ChatRequestFilterBuilder> filterBuilders =
-            this.componentManager.getInstanceList(ChatRequestFilterBuilder.class);
+            this.componentManagerProvider.get().getInstanceList(ChatRequestFilterBuilder.class);
         List<ChatRequestFilter> filters = new ArrayList<>();
         for (ChatRequestFilterBuilder filterBuilder : filterBuilders) {
             BaseObject filterObject = document.getXObject(filterBuilder.getClassReference());
@@ -213,6 +232,8 @@ public class ModelWikiObjectComponentBuilder implements WikiObjectComponentBuild
         ModelConfiguration modelConfiguration = new ModelConfiguration();
         modelConfiguration.setServerName(xObject.getStringValue(SERVER_NAME_FIELD));
         modelConfiguration.setModel(xObject.getStringValue(MODEL_FIELD));
+        modelConfiguration.setEmbeddingIndexPrefix(xObject.getStringValue(EMBEDDING_INDEX_PREFIX));
+        modelConfiguration.setEmbeddingQueryPrefix(xObject.getStringValue(EMBEDDING_QUERY_PREFIX));
         modelConfiguration.setDimensions(xObject.getIntValue(DIMENSIONS_FIELD));
         modelConfiguration.setContextSize(xObject.getIntValue(CONTEXT_SIZE_FIELD));
         modelConfiguration.setMaximumParallelism(xObject.getIntValue(MAXIMUM_PARALLELISM_FIELD, 100));

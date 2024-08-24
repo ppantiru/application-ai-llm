@@ -19,7 +19,11 @@
  */
 package org.xwiki.contrib.llm;
 
+import java.io.IOException;
+
 import org.xwiki.stability.Unstable;
+
+import com.theokanning.openai.OpenAiError;
 
 /**
  * An error that occurred during a request.
@@ -28,8 +32,10 @@ import org.xwiki.stability.Unstable;
  * @since 0.3
  */
 @Unstable
-public class RequestError extends Exception
+public class RequestError extends IOException
 {
+    private static final String SEPARATOR = ": ";
+
     private final int code;
 
     private final String message;
@@ -42,7 +48,22 @@ public class RequestError extends Exception
      */
     public RequestError(int code, String message)
     {
-        super(code + ": " + message);
+        super(code + SEPARATOR + message);
+
+        this.code = code;
+        this.message = message;
+    }
+
+    /**
+     * Creates a new request error.
+     *
+     * @param code the error code
+     * @param message the message
+     * @param cause the exception that caused the error
+     */
+    public RequestError(int code, String message, Exception cause)
+    {
+        super(code + SEPARATOR + message, cause);
 
         this.code = code;
         this.message = message;
@@ -53,7 +74,7 @@ public class RequestError extends Exception
      */
     public int getCode()
     {
-        return code;
+        return this.code;
     }
 
     /**
@@ -61,6 +82,15 @@ public class RequestError extends Exception
      */
     public String getPlainMessage()
     {
-        return message;
+        return this.message;
+    }
+
+    /**
+     * @return the error as OpenAI error object.
+     */
+    public OpenAiError getOpenAiError()
+    {
+        return new OpenAiError(new OpenAiError.OpenAiErrorDetails(this.message,
+            null, null, Integer.toString(this.code)));
     }
 }

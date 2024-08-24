@@ -21,14 +21,15 @@ package org.xwiki.contrib.llm.internal;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Type;
 import java.net.http.HttpResponse;
 import java.util.List;
 
-import org.xwiki.component.manager.ComponentLookupException;
-import org.xwiki.component.manager.ComponentManager;
-import org.xwiki.contrib.llm.EmbeddingModel;
-import org.xwiki.contrib.llm.EmbeddingModelDescriptor;
+import javax.inject.Inject;
+import javax.inject.Named;
+
+import org.xwiki.component.annotation.Component;
+import org.xwiki.component.annotation.InstantiationStrategy;
+import org.xwiki.component.descriptor.ComponentInstantiationStrategy;
 import org.xwiki.contrib.llm.RequestError;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -40,43 +41,28 @@ import com.theokanning.openai.embedding.Embedding;
 import com.theokanning.openai.embedding.EmbeddingRequest;
 
 /**
- * Implementation of {@link EmbeddingModel} that uses the OpenAI API.
+ * Implementation of {@link GPTAPIServer} that uses the OpenAI API. This component is meant to be instantiated and
+ * registered by the {@link GPTAPIServerWikiObjectComponentBuilder}.
  *
  * @version $Id$
- * @since 0.3
+ * @since 0.5
  */
-public class OpenAIEmbeddingModel extends AbstractModel implements EmbeddingModel
+@Component(roles = GPTAPIServerWikiComponent.class)
+@InstantiationStrategy(ComponentInstantiationStrategy.PER_LOOKUP)
+@Named("openai")
+public class OpenAIGPTAPIServer extends AbstractGPTAPIServer
 {
-    private final RequestHelper requestHelper;
-
-    /**
-     * Constructor.
-     *
-     * @param config the model configuration
-     * @param componentManager the component manager
-     * @throws ComponentLookupException if a component cannot be found
-     */
-    public OpenAIEmbeddingModel(ModelConfiguration config, ComponentManager componentManager)
-        throws ComponentLookupException
-    {
-        super(config, componentManager);
-        this.requestHelper = componentManager.getInstance(RequestHelper.class);
-    }
+    @Inject
+    private RequestHelper requestHelper;
 
     @Override
-    public double[] embed(String text) throws RequestError
+    public List<double[]> embed(String model, List<String> texts) throws RequestError
     {
-        return embed(List.of(text)).get(0);
-    }
-
-    @Override
-    public List<double[]> embed(List<String> texts) throws RequestError
-    {
-        EmbeddingRequest request = new EmbeddingRequest(this.modelConfiguration.getModel(), texts, null);
+        EmbeddingRequest request = new EmbeddingRequest(model, texts, null);
 
         try {
             HttpResponse<InputStream> httpResponse =
-                this.requestHelper.post(getConfig(), "embeddings", request, HttpResponse.BodyHandlers.ofInputStream());
+                this.requestHelper.post(this.config, "embeddings", request, HttpResponse.BodyHandlers.ofInputStream());
             ObjectMapper objectMapper = new ObjectMapper();
             objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
@@ -95,6 +81,9 @@ public class OpenAIEmbeddingModel extends AbstractModel implements EmbeddingMode
             } else {
                 throw new IOException("Response data is null");
             }
+        } catch (RequestError e) {
+            // Don't let the next catch clause catch this more specific exception.
+            throw e;
         } catch (IOException e) {
             throw new RequestError(500, e.getMessage());
         }
@@ -114,24 +103,5 @@ public class OpenAIEmbeddingModel extends AbstractModel implements EmbeddingMode
             OpenAiError error = objectMapper.readValue(httpResponse.body(), OpenAiError.class);
             throw new IOException(error.error.getMessage());
         }
-    }
-
-    @Override
-    public EmbeddingModelDescriptor getDescriptor()
-    {
-        return new EmbeddingModelDescriptor(getRoleHint(), this.modelConfiguration.getName(),
-            this.modelConfiguration.getDimensions());
-    }
-
-    @Override
-    public Type getRoleType()
-    {
-        return EmbeddingModel.class;
-    }
-
-    @Override
-    public int getMaximumParallelism()
-    {
-        return this.modelConfiguration.getMaximumParallelism();
     }
 }

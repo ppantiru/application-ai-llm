@@ -25,7 +25,7 @@
     <parent>
         <groupId>org.xwiki.contrib.llm</groupId>
         <artifactId>application-ai-llm-models</artifactId>
-        <version>0.5-SNAPSHOT</version>
+        <version>0.6.2-SNAPSHOT</version>
     </parent>
     <artifactId>application-ai-llm-models-ui</artifactId>
     <description>
@@ -62,11 +62,11 @@
             <visibleTechnicalPage>.*/AI/WebHome\.xml</visibleTechnicalPage>
           </visibleTechnicalPages>
           <contentPages>
-            <contentPage>.*/AI/Models/Ada-002.xml</contentPage>
-            <contentPage>.*/AI/Models/bert.xml</contentPage>
-            <contentPage>.*/AI/Models/GPT3.5-turbo.xml</contentPage>
-            <contentPage>.*/AI/Models/GPT4.xml</contentPage>
-            <contentPage>.*/AI/Models/mixtral.xml</contentPage>
+            <contentPage>.*/AI/Models/all-minilm.xml</contentPage>
+            <contentPage>.*/AI/Models/gpt-4o-mini.xml</contentPage>
+            <contentPage>.*/AI/Models/gpt-4o.xml</contentPage>
+            <contentPage>.*/AI/Models/qwen2.xml</contentPage>
+            <contentPage>.*/AI/Models/Default.xml</contentPage>
             <contentPage>.*/AI/PromptDB/Free Pompt.xml</contentPage>
             <contentPage>.*/AI/PromptDB/Summarize.xml</contentPage>
             <contentPage>.*/AI/PromptDB/Translate.xml</contentPage>
@@ -91,6 +91,10 @@
             </entry>
             <entry>
               <document>AI.Models.mixtral</document>
+              <type>demo</type>
+            </entry>
+            <entry>
+              <document>AI.Models.Default</document>
               <type>demo</type>
             </entry>
             <entry>

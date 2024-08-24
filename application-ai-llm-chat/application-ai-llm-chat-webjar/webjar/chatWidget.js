@@ -7,7 +7,7 @@ let abortController = null;
 let conversationHistory = [];
 let userSettings = {
     model: '',
-    temperature: 1,
+    temperature: 0,
     stream: true,
     settingsCollapsed: false
 };
@@ -23,19 +23,13 @@ let toggleChatButton;
 let settingsContainer;
 let settingsToggle;
 let newConvButton;
+let isResizing = false;
+let startX, startY, startWidth, startHeight;
 
 // Get the script tag
 const scriptTag = document.getElementById('chat-widget');
 
-// Check if the script tag exists and has the data-base-url attribute
-if (scriptTag && scriptTag.dataset.baseUrl) {
-    // Set the base URL using the data-base-url attribute
-    XWikiAiAPI.setBaseURL(scriptTag.dataset.baseUrl);
-} else {
-    // Fallback to a default URL or log an error
-    console.warn('Base URL not provided. Falling back on default value [http://localhost:8080/xwiki]', );
-    XWikiAiAPI.setBaseURL('http://localhost:8080/xwiki');
-}
+XWikiAiAPI.setBaseURL(scriptTag.dataset.baseUrl || '');
 
 // Set the wiki name
 if (scriptTag && scriptTag.dataset.wikiName) {
@@ -51,6 +45,8 @@ function createChatWidget() {
     const chatWidgetElement = document.createElement('div');
     chatWidgetElement.id = 'chat-widget';
     chatWidgetElement.innerHTML = `
+        <div id="resize-handle"></div>
+        <div id="chat-widget-divider"></div>
         <div id="chat-container">
             <h2>XWiki AI Chat</h2>
             <div class="settings-container">
@@ -65,7 +61,7 @@ function createChatWidget() {
                         </div>
                         <div>
                             <label for="temperature-input">Temp:</label>
-                            <input type="number" id="temperature-input" min="0" max="2" step="0.1" value="1">
+                            <input type="number" id="temperature-input" min="0" max="2" step="0.1" value="0">
                         </div>
                         <div>
                             <label for="stream-checkbox">Stream:</label>
@@ -91,9 +87,28 @@ function createChatWidget() {
 function createToggleChatButton() {
     const toggleChatButtonElement = document.createElement('button');
     toggleChatButtonElement.id = 'toggle-chat-button';
-    toggleChatButtonElement.textContent = 'LLM Chat';
+    toggleChatButtonElement.textContent = '✨ Chat';
     document.body.appendChild(toggleChatButtonElement);
     return toggleChatButtonElement;
+}
+
+// Create an expandable bubble with sources
+function createSourcesBubble(sources) {
+    const sourcesBubble = document.createElement('div');
+    sourcesBubble.classList.add('sources-bubble');
+    const sourceLinks = sources.split('\n').map(source => {
+        const trimmedSource = source.trim();
+        return `<li><a href="${trimmedSource}" target="_blank">${trimmedSource}</a></li>`;
+    }).join('');
+    sourcesBubble.innerHTML = `
+        <div class="sources-header">Sources <span class="expand-icon">+</span></div>
+        <div class="sources-content hidden"><ul>${sourceLinks}</ul></div>
+    `;
+    sourcesBubble.querySelector('.sources-header').addEventListener('click', () => {
+        sourcesBubble.querySelector('.sources-content').classList.toggle('hidden');
+        sourcesBubble.querySelector('.expand-icon').textContent = sourcesBubble.querySelector('.sources-content').classList.contains('hidden') ? '+' : '-';
+    });
+    return sourcesBubble;
 }
 
 // Fetch available models and populate the select dropdown
@@ -137,6 +152,10 @@ async function initializeChatWidget() {
     settingsContainer = document.querySelector('.settings-container');
     settingsToggle = document.getElementById('settings-toggle');
     newConvButton = document.getElementById('new-conv');
+    const resizeHandle = document.getElementById('resize-handle');
+    resizeHandle.addEventListener('mousedown', initResize);
+    document.addEventListener('mousemove', resize);
+    document.addEventListener('mouseup', stopResize);
 
     // Populate the model select dropdown
     await populateModelSelect();
@@ -160,6 +179,50 @@ async function initializeChatWidget() {
 
     // Load last conversation from local storage
     loadLastConversation();
+}
+
+
+function initResize(e) {
+    isResizing = true;
+    startX = e.clientX;
+    startY = e.clientY;
+    startWidth = parseInt(document.defaultView.getComputedStyle(chatWidget).width, 10);
+    startHeight = parseInt(document.defaultView.getComputedStyle(chatWidget).height, 10);
+    e.preventDefault();
+}
+
+function startResize(e) {
+    isResizing = true;
+    startX = e.clientX;
+    startY = e.clientY;
+    startWidth = parseInt(document.defaultView.getComputedStyle(chatWidget).width, 10);
+    startHeight = parseInt(document.defaultView.getComputedStyle(chatWidget).height, 10);
+    document.addEventListener('mousemove', resize);
+    document.addEventListener('mouseup', stopResize);
+    e.preventDefault();
+}
+
+function resize(e) {
+    if (!isResizing) return;
+    const width = startWidth - (e.clientX - startX);
+    const height = startHeight - (e.clientY - startY);
+    if (width > 300 && height > 400) {
+        chatWidget.style.width = width + 'px';
+        chatWidget.style.height = height + 'px';
+    }
+}
+
+function stopResize() {
+    isResizing = false;
+}
+
+// Modify the toggleChatWidget function
+function toggleChatWidget() {
+    if (isPanelMode) {
+        chatWidget.style.display = chatWidget.style.display === 'none' ? 'flex' : 'none';
+    } else {
+        chatWidget.style.display = chatWidget.style.display === 'none' ? 'block' : 'none';
+    }
 }
 
 // Handle new conversation
@@ -271,40 +334,53 @@ function sendMessage() {
 // Handle streaming request
 function handleStreamingRequest(request, signal, assistantMessageElement) {
     let messageText = '';
+    let sourcesText = '';
     const startTime = new Date().getTime();
     let updateTimer;
+    let sourcesBubble = null;
 
+    const assistantInfoElement = assistantMessageElement.previousElementSibling;
     updateTimer = setInterval(() => {
-        updateResponseTime(startTime, assistantMessageElement.previousElementSibling);
+        updateResponseTime(startTime, assistantInfoElement);
     }, 100);
 
     XWikiAiAPI.getCompletions(request, messageChunk => {
         if (messageChunk.choices.length > 0 && messageChunk.choices[0].delta.content !== null) {
-            messageText += messageChunk.choices[0].delta.content;
-            assistantMessageElement.innerHTML = DOMPurify.sanitize(marked.parse(messageText), { FORBID_TAGS: ['style'], FORBID_ATTR: ['src'] });
-            if (messageChunk.choices[0].delta.memory) {
-                console.debug('LLM memory before response:', messageChunk.choices[0].delta.memory);
+            const content = messageChunk.choices[0].delta.content;
+            
+            if (content.startsWith("Sources:")) {
+                sourcesText += content.replace("Sources:", "").trim();
+                if (!sourcesBubble) {
+                    sourcesBubble = createSourcesBubble(sourcesText);
+                    assistantMessageElement.parentElement.insertBefore(sourcesBubble, assistantMessageElement);
+                } else {
+                    sourcesBubble.querySelector('.sources-content').innerHTML = sourcesText;
+                }
+            } else {
+                messageText += content;
+                assistantMessageElement.innerHTML = DOMPurify.sanitize(marked.parse(messageText), { FORBID_TAGS: ['style'], FORBID_ATTR: ['src'] });
             }
+
             removeWaitingAnimation();
         }
     }, signal)
-        .then((usageData) => {
-            if (messageText !== '') {
-                conversationHistory.push({ role: 'assistant', content: assistantMessageElement.textContent });
-                saveConversationHistory();
-            }
-            clearInterval(updateTimer);
+    .then((usageData) => {
+        if (messageText !== '') {
+            conversationHistory.push({ role: 'assistant', content: assistantMessageElement.textContent });
+            saveConversationHistory();
+        }
+        clearInterval(updateTimer);
 
-            if (usageData) {
-                displayUsageInfo(assistantMessageElement.previousElementSibling, usageData, startTime);
-            }
-        })
-        .catch(error => {
-            handleRequestError(error, updateTimer);
-        })
-        .finally(() => {
-            changeBtnState(true);
-        });
+        if (usageData) {
+            displayUsageInfo(assistantInfoElement, usageData, startTime);
+        }
+    })
+    .catch(error => {
+        handleRequestError(error, updateTimer);
+    })
+    .finally(() => {
+        changeBtnState(true);
+    });
 }
 
 // Display usage information
@@ -352,30 +428,33 @@ function handleNonStreamingResponse(response, startTime, assistantMessageElement
     const assistantMessage = response.choices[0].message.content;
     const llmMemory = response.choices[0].message.memory;
     console.debug('LLM memory before response:', llmMemory);
-    assistantMessageElement.innerHTML = DOMPurify.sanitize(marked.parse(assistantMessage), { FORBID_TAGS: ['style'], FORBID_ATTR: ['src'] });
+
+    const sourcesMatch = assistantMessage.match(/Sources:([\s\S]*?)(?=\n\n|$)/);
+    if (sourcesMatch) {
+        const sources = sourcesMatch[1].trim();
+        const content = assistantMessage.replace(sourcesMatch[0], '').trim();
+        const sourcesBubble = createSourcesBubble(sources);
+        assistantMessageElement.parentElement.insertBefore(sourcesBubble, assistantMessageElement);
+        assistantMessageElement.innerHTML = DOMPurify.sanitize(marked.parse(content), { FORBID_TAGS: ['style'], FORBID_ATTR: ['src'] });
+    } else {
+        assistantMessageElement.innerHTML = DOMPurify.sanitize(marked.parse(assistantMessage), { FORBID_TAGS: ['style'], FORBID_ATTR: ['src'] });
+    }
+
     conversationHistory.push({ role: 'assistant', content: assistantMessage });
     chatHistory.scrollTop = chatHistory.scrollHeight;
     removeWaitingAnimation();
     saveConversationHistory();
 
-    const assistantLabel = assistantMessageElement.previousElementSibling;
-    assistantLabel.innerHTML = `<strong>Assistant (${modelSelect.options[modelSelect.selectedIndex].text})</strong> - <em>&Delta;T ${responseTime.toFixed(1)}s </em>`;
-    if (response.usage) {
-        const usageSpan = document.createElement('span');
-        usageSpan.classList.add('usage');
-        usageSpan.innerHTML = ' - <em>tokens</em><span class="usage-info">(&#128202;)</span>';
-        assistantLabel.appendChild(usageSpan);
+    const assistantInfoElement = assistantMessageElement.previousElementSibling.querySelector('.msg-info');
+    if (assistantInfoElement) {
+        assistantInfoElement.innerHTML = `<strong>Assistant (${modelSelect.options[modelSelect.selectedIndex].text})</strong> - <em>&Delta;T ${responseTime.toFixed(1)}s </em>`;
 
-        const usageInfo = document.createElement('div');
-        usageInfo.classList.add('usage-info-box');
-        usageInfo.innerHTML = `
-            <p>Prompt tokens: ${response.usage.prompt_tokens}</p>
-            <p>Completion tokens: ${response.usage.completion_tokens}</p>
-            <p>Total tokens: ${response.usage.total_tokens}</p>
-        `;
-        usageSpan.appendChild(usageInfo);
+        if (response.usage) {
+            displayUsageInfo(assistantInfoElement, response.usage, startTime);
+        }
+    } else {
+        console.warn('Assistant info element not found');
     }
-    assistantLabel.innerHTML += ':';
 }
 
 function endTimer(startTime) {
@@ -390,7 +469,7 @@ function handleRequestError(error, updateTimer) {
         console.log('Request aborted');
     } else {
         console.error('Failed to get chat completions:', error);
-        displayErrorMessage('An error occurred. Please try again.');
+        displayErrorMessage('An error occurred: ' + error.message);
     }
     removeWaitingAnimation();
     clearInterval(updateTimer);
@@ -457,10 +536,10 @@ function displayAssistantMessage(message, modelName = '', responseTime = null) {
 
 
 // Update the response time in the assistant label
-function updateResponseTime(startTime, assistantLabel) {
+function updateResponseTime(startTime, assistantInfoElement) {
     const currentTime = new Date().getTime();
     const elapsedTime = (currentTime - startTime) / 1000;
-    assistantLabel.innerHTML = `<strong>Assistant (${modelSelect.options[modelSelect.selectedIndex].text})</strong> - &Delta;T ${elapsedTime.toFixed(1)}s:`;
+    assistantInfoElement.innerHTML = `<strong>Assistant (${modelSelect.options[modelSelect.selectedIndex].text})</strong> - &Delta;T ${elapsedTime.toFixed(1)}s:`;
 }
 
 // Display error message in the chat history

@@ -25,7 +25,7 @@
   <parent>
     <groupId>org.xwiki.contrib.llm</groupId>
     <artifactId>application-ai-llm</artifactId>
-    <version>0.5-SNAPSHOT</version>
+    <version>0.6.2-SNAPSHOT</version>
   </parent>
 
   <artifactId>application-ai-llm-models</artifactId>
@@ -36,5 +36,6 @@
   <modules>
     <module>application-ai-llm-models-api</module>
     <module>application-ai-llm-models-ui</module>
+    <module>application-ai-llm-models-internal</module>
   </modules>
 </project>
