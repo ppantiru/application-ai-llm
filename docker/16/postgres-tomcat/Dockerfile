@@ -62,13 +62,13 @@ RUN rm -rf /usr/local/tomcat/webapps/* && \
 # Copy the JDBC driver in the XWiki webapp
 # We take the database driver version from the Maven Central repository since we want to control the version 
 # used and have it being consistent with what is tested in the CI.
-ENV MYSQL_JDBC_VERSION="9.0.0"
-ENV MYSQL_JDBC_SHA256="a221c4106b7fe68a45912cdbf8351f1b43ad3c53a43c3bc966181cc14f86fa30"
-ENV MYSQL_JDBC_PREFIX="https://repo1.maven.org/maven2/com/mysql/mysql-connector-j/${MYSQL_JDBC_VERSION}"
-ENV MYSQL_JDBC_ARTIFACT="mysql-connector-j-${MYSQL_JDBC_VERSION}.jar"
-ENV MYSQL_JDBC_TARGET="/usr/local/tomcat/webapps/ROOT/WEB-INF/lib/${MYSQL_JDBC_ARTIFACT}"
-RUN curl -fSL "${MYSQL_JDBC_PREFIX}/${MYSQL_JDBC_ARTIFACT}" -o $MYSQL_JDBC_TARGET && \
-  echo "$MYSQL_JDBC_SHA256 $MYSQL_JDBC_TARGET" | sha256sum -c -
+ENV POSTGRES_JDBC_VERSION="42.7.3"
+ENV POSTGRES_JDBC_SHA256="a2644cbfba1baa145ff7e8c8ef582a6eed7a7ec4ca792f7f054122bdec756268"
+ENV POSTGRES_JDBC_PREFIX="https://repo1.maven.org/maven2/org/postgresql/postgresql/${POSTGRES_JDBC_VERSION}"
+ENV POSTGRES_JDBC_ARTIFACT="postgresql-${POSTGRES_JDBC_VERSION}.jar"
+ENV POSTGRES_JDBC_TARGET="/usr/local/tomcat/webapps/ROOT/WEB-INF/lib/${POSTGRES_JDBC_ARTIFACT}"
+RUN curl -fSL "${POSTGRES_JDBC_PREFIX}/${POSTGRES_JDBC_ARTIFACT}" -o $POSTGRES_JDBC_TARGET && \
+  echo "$POSTGRES_JDBC_SHA256 $POSTGRES_JDBC_TARGET" | sha256sum -c -
 
 # Install the AILLM flavor
 ENV LLM_XIP_VERSION="0.6.2"
@@ -84,18 +84,9 @@ COPY tomcat/setenv.sh /usr/local/tomcat/bin/
 # Setup the XWiki Hibernate configuration
 COPY xwiki/hibernate.cfg.xml /usr/local/tomcat/webapps/ROOT/WEB-INF/hibernate.cfg.xml
 
-COPY xwiki/*.xip /opt/extensions/
-
 # Set a specific distribution id in XWiki for this docker packaging.
 RUN sed -i 's/<id>org.xwiki.platform:xwiki-platform-distribution-war/<id>org.xwiki.platform:xwiki-platform-distribution-docker/' \
   /usr/local/tomcat/webapps/ROOT/META-INF/extension.xed
-
-# RUN sed -i 's|<xwiki.extension.knownFlavors>\(.*\)</xwiki.extension.knownFlavors>|<xwiki.extension.knownFlavors>\1,\n      org.xwiki.platform:xwiki-platform-distribution-flavor-mainwiki-ai-llm/16.2.0</xwiki.extension.knownFlavors>|' /usr/local/tomcat/webapps/ROOT/META-INF/extension.xed
-
-# RUN sed -i '/^# distribution.job.interactive.wiki=true/a distribution.job.interactive=false\ndistribution.job.interactive.wiki=false\nwikiInitializer.initializeMainWiki=true\nwikiInitializer.initializeSubWikis=true\nwikiInitializer.startDistributionWizardOnInit=true' /usr/local/tomcat/webapps/ROOT/WEB-INF/xwiki.properties
-# RUN sed -i '/^# distribution.job.interactive.wiki=true/a distribution.job.interactive=false\n\ndistribution.job.interactive.wiki=false\n\nwikiInitializer.initializeMainWiki=true\n\nwikiInitializer.startDistributionWizardOnInit=true' /usr/local/tomcat/webapps/ROOT/WEB-INF/xwiki.properties
-# RUN sed -i '/^# distribution.job.interactive.wiki=true/a wikiInitializer.initializeMainWiki=true\nwikiInitializer.startDistributionWizardOnInit=true' /usr/local/tomcat/webapps/ROOT/WEB-INF/xwiki.properties
-# RUN sed -i '/^# distribution.job.interactive.wiki=true/a wikiInitializer.initializeMainWiki=true' /usr/local/tomcat/webapps/ROOT/WEB-INF/xwiki.properties
 
 # Add scripts required to make changes to XWiki configuration files at execution time
 # Note: we don't run CHMOD since 1) it's not required since the executabe bit is already set in git and 2) running
